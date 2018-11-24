@@ -1,10 +1,30 @@
 const express = require('express');
+const db = require('./src/connection/db');
+const halo = require('./src/halo/functions');
+
 const app = express();
 const bodyParser = require('body-parser');
+
+
 const port = process.env.PORT || 5000;
 
 app.get('/api/hello', (req, res) => {
   res.send({ express: 'Hello From Express' });
+});
+
+app.get('/api/players', async (req, res) => {
+  var data = await halo.lastplayed()
+  var format_data = []
+
+  for (const x of data) {
+    format_data.push({
+      player: x.player,
+      timeago: x.time.timeago,
+      seconds: x.time.seconds
+    })
+  }
+
+  res.send(data)
 });
 
 app.post('/api/world', (req, res) => {

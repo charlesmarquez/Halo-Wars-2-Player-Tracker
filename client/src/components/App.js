@@ -1,52 +1,44 @@
-import React, { Component } from 'react';
-import '../styles/App.css';
+import React, { Component } from "react";
+import DataTable from './datatable'
+import "../styles/App.css";
+import "react-table/react-table.css"
 
 class App extends Component {
-  state = {
-    response: '',
-    post: '',
-    responseToPost: '',
-  };
-  componentDidMount() {
-    this.callApi()
-      .then(res => this.setState({ response: res.express }))
-      .catch(err => console.log(err));
+  constructor() {
+    super()
+    this.state = {
+      data: []
+    }
   }
+  
+  componentDidMount() {
+    this.callApi().then(res => {
+      this.setState({
+        data: res
+      })
+    })
+    .catch(err => {
+      console.log(err);
+    })
+  }
+
   callApi = async () => {
-    const response = await fetch('/api/hello');
+    const response = await fetch("/api/players");
     const body = await response.json();
     if (response.status !== 200) throw Error(body.message);
+    await this.setState({
+      data: body
+    })
     return body;
   };
-  handleSubmit = async e => {
-    e.preventDefault();
-    const response = await fetch('/api/world', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ post: this.state.post }),
-    });
-    const body = await response.text();
-    this.setState({ responseToPost: body });
-  };
-render() {
+
+  render() {
     return (
       <div className="App">
-        <p>{this.state.response}</p>
-        <form onSubmit={this.handleSubmit}>
-          <p>
-            <strong>Post to Server:</strong>
-          </p>
-          <input
-            type="text"
-            value={this.state.post}
-            onChange={e => this.setState({ post: e.target.value })}
-          />
-          <button type="submit">Submit</button>
-        </form>
-        <p>{this.state.responseToPost}</p>
-      </div>
+        <strong>Halo Player Tracker</strong>
+        <button onClick={this.callApi}>Refresh</button>
+        <DataTable name="DataTable" callApi={this.callApi.bind(this)} data={this.state.data}></DataTable>
+        </div>
     );
   }
 }
