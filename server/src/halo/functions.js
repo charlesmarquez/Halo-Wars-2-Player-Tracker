@@ -4,6 +4,7 @@ const en = require('javascript-time-ago/locale/en');
 const halo = require('./hw2api');
 const db = require('../connection/db');
 
+
 function formatDuration(duration) {
     patternh = /(\d+)H(\d+)M(\d+)./g;
     patternm = /(\d+)M(\d+)./g;

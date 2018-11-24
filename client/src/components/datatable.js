@@ -5,7 +5,13 @@ export default class datatable extends Component {
         super()
 
         this.state = {
-            data: props.data
+            data: {
+                player: 'Loading ...',
+                time: {
+                    timeago: '...',
+                    seconds: '...',
+                }
+            }
         }
     }
 
@@ -15,32 +21,36 @@ export default class datatable extends Component {
                   this.setState({
                     data: res
                   })
+                  console.log(this.state)
                 })
         }, 5000);
     }
 
+    setData = async () => {
+      this.props.callApi().then(res => {
+        this.setState({
+          data: res
+        })
+      })
+    }
+
     render() {
         return (
-            <div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Player</th>
-                            <th>TimeAgo</th>
-                            <th>Seconds</th>
-                            <th>
-                                <button>button</button>
-                            </th>
-                        </tr>
-                    </thead>
+            <div>                    <button onClick={this.setData}>Refresh</button>
+                <table className="table">
+                        <div className="row header">
+                            <th className="cell">Player</th>
+                            <th className="cell">TimeAgo</th>
+                            <th className="cell">Seconds</th>
+                        </div>
                         <tbody>
                         {Array
                             .from(this.state.data)
                             .map(row => (
-                                <tr>
-                                    <td>{row.player}</td>
-                                    <td>{row.time.timeago}</td>
-                                    <td>{row.time.seconds}</td>
+                                <tr className="row">
+                                    <td className="cell">{row.player}</td>
+                                    <td className="cell">{row.time.timeago}</td>
+                                    <td className="cell">{row.time.seconds}</td>
                                 </tr>
                             ))}
                         </tbody>

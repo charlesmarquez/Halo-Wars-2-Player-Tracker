@@ -29,6 +29,7 @@ class App extends Component {
     await this.setState({
       data: body
     })
+    console.log(body)
     return body;
   };
 
@@ -36,8 +37,14 @@ class App extends Component {
     return (
       <div className="App">
         <strong>Halo Player Tracker</strong>
-        <button onClick={this.callApi}>Refresh</button>
+        <div className="limiter">
+        <div className="container-table100">
+        <div className="wrap-table100">
+
         <DataTable name="DataTable" callApi={this.callApi.bind(this)} data={this.state.data}></DataTable>
+        </div>
+        </div>
+        </div>
         </div>
     );
   }
