@@ -15,6 +15,7 @@ x = [{
         c: 13
     }
 ]
-
-q= x.hasMin('c')
-console.log(q)
+q = x.reduce((prev, curr) => {
+    console.log(prev)
+    console.log(curr)
+})

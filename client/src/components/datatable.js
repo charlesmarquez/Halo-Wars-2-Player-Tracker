@@ -1,7 +1,8 @@
 import React, {Component} from 'react'
+import AnimateOnChange from 'react-animate-on-change'
 
 export default class datatable extends Component {
-    constructor(props) {
+    constructor() {
         super()
 
         this.state = {
@@ -9,7 +10,7 @@ export default class datatable extends Component {
                 player: 'Loading ...',
                 time: {
                     timeago: '...',
-                    seconds: '...',
+                    seconds: '...'
                 }
             }
         }
@@ -17,44 +18,61 @@ export default class datatable extends Component {
 
     componentDidMount = () => {
         this.timerID = setTimeout(async() => {
-        this.props.callApi().then(res => {
-                  this.setState({
-                    data: res
-                  })
-                  console.log(this.state)
+            this
+                .props
+                .callApi()
+                .then(res => {
+                    this.setState({data: res})
                 })
-        }, 5000);
+        }, 1);
     }
 
-    setData = async () => {
-      this.props.callApi().then(res => {
-        this.setState({
-          data: res
-        })
-      })
+    componentDidUpdate = (prevState) => {
+        console.log(prevState)
+    }
+
+    setData = async() => {
+        this
+            .props
+            .callApi()
+            .then(res => {
+                this.setState({data: res})
+            })
+    }
+
+    handleChange = (event) => {
+        console.log(`something changed`)
     }
 
     render() {
         return (
-            <div>                    <button onClick={this.setData}>Refresh</button>
-                <table className="table">
-                        <div className="row header">
-                            <th className="cell">Player</th>
-                            <th className="cell">TimeAgo</th>
-                            <th className="cell">Seconds</th>
-                        </div>
-                        <tbody>
-                        {Array
-                            .from(this.state.data)
-                            .map(row => (
-                                <tr className="row">
-                                    <td className="cell">{row.player}</td>
-                                    <td className="cell">{row.time.timeago}</td>
-                                    <td className="cell">{row.time.seconds}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                </table>
+            <div>
+                <form className='form-horizontal'>
+                    <div className="form-group">
+                        <label>Add Player</label>
+                        <input type="email" className="form-control"/>
+                    </div>
+                </form>
+                <br/>
+                <button onClick={this.setData} className="btn btn-info btn-block">Refresh</button>
+                <div className="table">
+                    <div className="row header">
+                        <div className="cell">Player</div>
+                        <div className="cell">TimeAgo</div>
+                        <div className="cell">Seconds</div>
+                    </div>
+                    {Array
+                        .from(this.state.data)
+                        .map(row => (
+                            <AnimateOnChange baseClassName="row" animationClassName='example' customTag="div" animate={true} onAnimationEnd={() => {
+                                console.log('animation end')
+                            }}>
+                                <div className="cell">{row.player}</div>
+                                <div className="cell">{row.time.timeago}</div>
+                                <div className="cell" >{row.time.seconds}</div>
+                            </AnimateOnChange>
+                        ))}
+                </div>
             </div>
         )
     }

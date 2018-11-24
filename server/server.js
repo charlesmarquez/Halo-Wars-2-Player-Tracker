@@ -14,16 +14,8 @@ app.get('/api/hello', (req, res) => {
 
 app.get('/api/players', async (req, res) => {
   var data = await halo.lastplayed()
-  var format_data = []
 
-  for (const x of data) {
-    format_data.push({
-      player: x.player,
-      timeago: x.time.timeago,
-      seconds: x.time.seconds
-    })
-  }
-
+  data.sort(function(a, b){return a.time.seconds - b.time.seconds})
   res.send(data)
 });
 

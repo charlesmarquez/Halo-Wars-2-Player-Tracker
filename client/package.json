@@ -5,6 +5,7 @@
   "proxy": "http://localhost:5000/",
   "dependencies": {
     "react": "^16.6.3",
+    "react-animate-on-change": "^2.1.1",
     "react-dom": "^16.6.3",
     "react-scripts": "2.1.1",
     "react-table": "^6.8.6"

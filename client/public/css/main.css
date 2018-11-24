@@ -112,7 +112,7 @@ iframe {
 }
 
 .wrap-table100 {
-  width: 768px;
+  width: 960px;
   border-radius: 10px;
   overflow: hidden;
 }
@@ -129,10 +129,20 @@ iframe {
   }
 }
 
-.row {
+.row{
   display: table-row;
   background: #fff;
 }
+
+.row.example .cell{
+  -webkit-animation-name: example;
+  -webkit-animation-duration: 0.8s;
+}
+
+@-webkit-keyframes example {
+  0% {background-color: rgb(71, 177, 238)}
+  100% {background-color: #ffffff} 
+} 
 
 .row.header {
   color: #ffffff;
@@ -150,7 +160,7 @@ iframe {
   }
 
   .row.header .cell {
-    display: block;
+    display: none;
   }
 
   .row .cell:before {
@@ -198,30 +208,16 @@ iframe {
   font-weight: unset !important;
 }
 
-
-.row.header .cell:nth-child(1) {
-  width: 33%;
-}
-
-.row.header .cell:nth-child(2) {
-  width: 33%;
-}
-
-.row.header .cell:nth-child(3) {
-  width: 33%;
-}
-
-
 .row .cell:nth-child(1) {
-  width: 33%;
+  width: 45%;
 }
 
 .row .cell:nth-child(2) {
-  width: 33%;
+  width: 30%;
 }
 
 .row .cell:nth-child(3) {
-  width: 33%;
+  width: 25%;
 }
 
 .table, .row {
@@ -249,7 +245,7 @@ iframe {
     padding-bottom: 16px;
   }
   .row .cell:nth-child(1) {
-    padding-left: 0px;
+    padding-left: 30px;
   }
   
   .row .cell {
@@ -264,3 +260,4 @@ iframe {
     width: 100% !important;
   }
 }
+
