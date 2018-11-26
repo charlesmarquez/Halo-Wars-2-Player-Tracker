@@ -1,4 +1,5 @@
 import React, {Component} from 'react'
+import PlayerForm from './playerForm'
 import AnimateOnChange from 'react-animate-on-change'
 
 export default class datatable extends Component {
@@ -47,12 +48,7 @@ export default class datatable extends Component {
     render() {
         return (
             <div>
-                <form className='form-horizontal'>
-                    <div className="form-group">
-                        <label>Add Player</label>
-                        <input type="email" className="form-control"/>
-                    </div>
-                </form>
+                <PlayerForm>123123123</PlayerForm>
                 <br/>
                 <button onClick={this.setData} className="btn btn-info btn-block">Refresh</button>
                 <div className="table">
@@ -64,12 +60,17 @@ export default class datatable extends Component {
                     {Array
                         .from(this.state.data)
                         .map(row => (
-                            <AnimateOnChange baseClassName="row" animationClassName='example' customTag="div" animate={true} onAnimationEnd={() => {
+                            <AnimateOnChange
+                                baseClassName="row"
+                                animationClassName='example'
+                                customTag="div"
+                                animate={true}
+                                onAnimationEnd={() => {
                                 console.log('animation end')
                             }}>
                                 <div className="cell">{row.player}</div>
                                 <div className="cell">{row.time.timeago}</div>
-                                <div className="cell" >{row.time.seconds}</div>
+                                <div className="cell">{row.time.seconds}</div>
                             </AnimateOnChange>
                         ))}
                 </div>
