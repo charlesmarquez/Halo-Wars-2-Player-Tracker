@@ -10,7 +10,8 @@ export default class datatable extends Component {
                 player: 'Loading ...',
                 time: {
                     timeago: '...',
-                    seconds: '...'
+                    seconds: '...',
+                    matchType: '...'
                 }
             }
         }
@@ -61,7 +62,7 @@ export default class datatable extends Component {
                     <div className="row header">
                         <div className="cell">Player</div>
                         <div className="cell">Time Ago</div>
-                        <div className="cell">Seconds Ago</div>
+                        <div className="cell">Match Type</div>
                     </div>
                     {Array
                         .from(this.state.data)
@@ -71,7 +72,7 @@ export default class datatable extends Component {
                             }}>
                                 <div className="cell">{row.player}</div>
                                 <div className="cell">{row.time.timeago}</div>
-                                <div className="cell" >{row.time.seconds}</div>
+                                <div className="cell" >{row.time.matchType}</div>
                             </AnimateOnChange>
                         ))}
                 </div>
