@@ -29,7 +29,7 @@ export default class datatable extends Component {
     }
 
     componentDidUpdate = (prevState) => {
-        console.log(prevState)
+        console.log(prevState.data)
     }
 
     setData = async() => {
@@ -38,7 +38,6 @@ export default class datatable extends Component {
             .callApi()
             .then(res => {
                 this.setState({data: res})
-                console.log(res)
             })
 
     }
@@ -64,15 +63,16 @@ export default class datatable extends Component {
                         <div className="cell">Time Ago</div>
                         <div className="cell">Match Type</div>
                     </div>
-                    {Array
+                    {   
+                        Array
                         .from(this.state.data)
                         .map(row => (
-                            <AnimateOnChange baseClassName="row" animationClassName='fadeinRow' customTag="div" animate={true} onAnimationEnd={() => {
+                            <AnimateOnChange baseClassName={(row.time.seconds < 3600) ? "row online": "row"} animationClassName='fadeinRow' customTag="div" animate={true} onAnimationEnd={() => {
                                 console.log('animation end')
                             }}>
                                 <div className="cell">{row.player}</div>
                                 <div className="cell">{row.time.timeago}</div>
-                                <div className="cell" >{row.time.matchType}</div>
+                                <div className="cell">{row.time.matchType}</div>
                             </AnimateOnChange>
                         ))}
                 </div>
