@@ -50,7 +50,7 @@ export default class datatable extends Component {
                 <form className='form-horizontal'>
                     <div className="form-group">
                         <label>Add Player</label>
-                        <input type="email" className="form-control"/>
+                        <input type="text" className="form-control"/>
                     </div>
                 </form>
                 <br/>
@@ -58,8 +58,8 @@ export default class datatable extends Component {
                 <div className="table">
                     <div className="row header">
                         <div className="cell">Player</div>
-                        <div className="cell">TimeAgo</div>
-                        <div className="cell">Seconds</div>
+                        <div className="cell">Time Ago</div>
+                        <div className="cell">Seconds Ago</div>
                     </div>
                     {Array
                         .from(this.state.data)
