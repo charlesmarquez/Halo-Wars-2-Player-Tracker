@@ -134,12 +134,12 @@ iframe {
   background: #fff;
 }
 
-.row.example .cell{
-  -webkit-animation-name: example;
+.row.fadeinRow{
+  -webkit-animation-name: fadeinRow;
   -webkit-animation-duration: 0.8s;
 }
 
-@-webkit-keyframes example {
+@-webkit-keyframes fadeinRow {
   0% {background-color: rgb(71, 177, 238)}
   100% {background-color: #ffffff} 
 } 

@@ -37,7 +37,9 @@ export default class datatable extends Component {
             .callApi()
             .then(res => {
                 this.setState({data: res})
+                console.log(res)
             })
+
     }
 
     handleChange = (event) => {
@@ -64,7 +66,7 @@ export default class datatable extends Component {
                     {Array
                         .from(this.state.data)
                         .map(row => (
-                            <AnimateOnChange baseClassName="row" animationClassName='example' customTag="div" animate={true} onAnimationEnd={() => {
+                            <AnimateOnChange baseClassName="row" animationClassName='fadeinRow' customTag="div" animate={true} onAnimationEnd={() => {
                                 console.log('animation end')
                             }}>
                                 <div className="cell">{row.player}</div>
