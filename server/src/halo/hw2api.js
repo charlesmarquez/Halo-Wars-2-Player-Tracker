@@ -19,7 +19,13 @@ async function getRequest(url) {
     }
 
     response = await limiter.request(options)
-    return response
+
+    switch (response.statusCode) {
+        case 200:
+            return response
+        default:
+            throw "Invalid Response.";
+    }
 }
 
 async function getJson(response) {
@@ -119,6 +125,44 @@ async function getPlayerSummary(player = 'mike beaston', id = 'right-content') {
 }
 module.exports.getPlayerSummary = getPlayerSummary
 
+async function getLastGameID(player) {
+    var url = `https://www.haloapi.com/stats/hw2/players/${player}/matches?start=1&count=1`
+
+    const response = await getRequest(url);
+    const json = await getJson(response);
+    return (json.Results[0].MatchId);
+}
+
+async function getPlayer(player = 'Mike BEASTon') {
+
+        var player = player
+        var playerName = player
+
+        var matchId = await getLastGameID(player);
+
+        var url = `https://www.haloapi.com/stats/hw2/matches/${matchId}/events`
+        const response = await getRequest(url);
+        const json = await getJson(response);
+
+        events = json.GameEvents
+
+
+        for (const event of events) {
+            if (event.EventName == 'PlayerJoinedMatch') {
+                if (event.HumanPlayerId !== null) {
+                    playerName = event.HumanPlayerId.Gamertag;
+                    if (player.toUpperCase() === playerName.toUpperCase()) {
+                        return playerName
+                    }
+
+                }
+            }
+        }
+}
+
+module.exports.getPlayer = getPlayer
+
+
 async function parseMaps() {
     req = await getRequest(`https://www.haloapi.com/metadata/hw2/maps`)
     json = await getJson(req)
@@ -183,10 +227,10 @@ async function getKey(keydict) {
         if (key.called < 10) {
             key.called++
             result = String(key.key)
-            console.log(`key: ${key.key} | called: ${key.called} | status: ${key.status}`);
+            // console.log(`key: ${key.key} | called: ${key.called} | status: ${key.status}`);
         } else {
             key.status = false
-            console.log(`${key.key} switched to ${key.status}`);
+            // console.log(`${key.key} switched to ${key.status}`);
             resetKeys(keydict)
         }
     }
@@ -220,7 +264,7 @@ function resetKeys(keydict) {
     return keydict
 }
 
-function keySelect() {
+function testkeys() {
     keydict = initKeys()
 
     for (let i = 0; i < 70; i++) {
@@ -239,3 +283,9 @@ var limiter = new RateLimiter({
 });
 
 console.log(`limiter initiated: ${limiter.rate} reqs per ${limiter.interval}s`);
+
+// x = async () => {
+//     gamertag = await getPlayer('l1am wh1te')
+// }
+// 
+// x()

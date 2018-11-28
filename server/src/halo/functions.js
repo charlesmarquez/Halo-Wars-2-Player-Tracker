@@ -49,7 +49,7 @@ function time_ago(result) {
 
     diff = timeAgo.format(Date.now() - diffms)
     return {
-        seconds: Math.floor(diffms/1000),
+        seconds: Math.floor(diffms / 1000),
         timeago: diff,
         matchType: matchType
     }
@@ -75,6 +75,12 @@ async function getTimeDiff(playerName = 'Mike BEASTon') {
     }
 }
 
+/**
+ * @function (lastplayed)
+ * 
+ * @returns {dict} of results from MongoDB Atlas data binded with HW2 API Results
+ */
+
 async function lastplayed() {
     halodb = await db.getValues()
 
@@ -94,3 +100,8 @@ async function lastplayed() {
 
 }
 module.exports.lastplayed = lastplayed
+
+async function getValidName(player) {
+    return halo.getPlayer(player)
+}
+module.exports.getValidName = getValidName

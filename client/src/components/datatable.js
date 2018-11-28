@@ -1,5 +1,7 @@
 import React, {Component} from 'react'
 import AnimateOnChange from 'react-animate-on-change'
+import PlayerForm from "./PlayerForm";
+import uuidv4 from 'uuid/v4'
 
 export default class datatable extends Component {
     constructor() {
@@ -29,7 +31,7 @@ export default class datatable extends Component {
     }
 
     componentDidUpdate = (prevState) => {
-        console.log(prevState.data)
+        // console.log(prevState.data)
     }
 
     setData = async() => {
@@ -49,12 +51,7 @@ export default class datatable extends Component {
     render() {
         return (
             <div>
-                <form className='form-horizontal'>
-                    <div className="form-group">
-                        <label>Add Player</label>
-                        <input type="text" className="form-control"/>
-                    </div>
-                </form>
+                <PlayerForm></PlayerForm>
                 <br/>
                 <button onClick={this.setData} className="btn btn-info btn-block">Refresh</button>
                 <div className="table">
@@ -63,13 +60,18 @@ export default class datatable extends Component {
                         <div className="cell">Time Ago</div>
                         <div className="cell">Match Type</div>
                     </div>
-                    {   
-                        Array
+                    {Array
                         .from(this.state.data)
                         .map(row => (
-                            <AnimateOnChange baseClassName={(row.time.seconds < 3600) ? "row online": "row"} animationClassName='fadeinRow' customTag="div" animate={true} onAnimationEnd={() => {
-                                console.log('animation end')
-                            }}>
+                            <AnimateOnChange
+                                baseClassName={(row.time.seconds < 3600)
+                                ? "row online"
+                                : "row"}
+                                key = {uuidv4()}
+                                animationClassName='fadeinRow'
+                                customTag="div"
+                                animate={true}
+                                >
                                 <div className="cell">{row.player}</div>
                                 <div className="cell">{row.time.timeago}</div>
                                 <div className="cell">{row.time.matchType}</div>

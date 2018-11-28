@@ -17,17 +17,17 @@ class App extends Component {
         if (response.status !== 200) 
             throw Error(body.message);
         await this.setState({data: body})
-        console.log(body)
+        console.log(response.url)
         return body;
     };
 
     render() {
         return (
-            <div className="App">
+            <div className="App" key='p'>
                 <strong>Halo Player Tracker</strong>
-                <div className="limiter">
-                    <div className="container-table100">
-                        <div className="wrap-table100">
+                <div className="limiter" key='o'>
+                    <div className="container-table100" key= 'm'>
+                        <div className="wrap-table100" key='l'>
                             <DataTable
                                 name="DataTable"
                                 callApi={this

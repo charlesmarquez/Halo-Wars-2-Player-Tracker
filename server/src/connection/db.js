@@ -22,14 +22,16 @@ async function insertValue(item) {
     conn = await getconn()
     db = conn.db(dbname)
 
-    console.log(`${dbname}: ${collection}`);
-
     var coll = db.collection(collection)
     coll.insertOne(item, (err, res) => {
-        assert.equal(null, err)
-        console.log(`Inserted: ${item.gamertag}`);
+        if (err !== null) {
+            console.error(`Already exists in database. _id found. | ${item.gamertag}`);
+            return false
+        } else {
+            console.log(`Inserted: ${item.gamertag}`);
+            return true
+        }
     })
-
     conn.close();
 }
 module.exports.insertValue = insertValue

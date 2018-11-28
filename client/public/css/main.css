@@ -151,12 +151,12 @@ iframe {
 
 @-webkit-keyframes fadeinRow2 {
   0% {background-color: #ffffff} 
-  60% {background-color: rgb(172, 217, 243)}
+  35% {background-color: rgb(172, 217, 243)}
 } 
 
 @-webkit-keyframes fadeinRow {
   0% {background-color: #ffffff} 
-  60% {background-color: rgb(172, 217, 243)}
+  35% {background-color: rgb(172, 217, 243)}
   100% {background-color: #ffffff} 
 } 
 
