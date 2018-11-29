@@ -68,7 +68,7 @@ function time_ago(result) {
  */
 
 async function getTimeDiff(playerName = 'Mike BEASTon') {
-    history = await halo.getHistory(1, playerName)
+    const history = await halo.getHistory(1, playerName)
     for (res of history) {
         timeDiff = time_ago(res)
         return timeDiff
@@ -82,26 +82,46 @@ async function getTimeDiff(playerName = 'Mike BEASTon') {
  */
 
 async function lastplayed() {
-    halodb = await db.getValues()
+    var halodb = await db.getValues()
 
-    var results = []
-
-    for (res of halodb) {
-        player = res.gamertag
+    for (row of halodb) {
+        player = row.Player.Gamertag
         timeAGO = await getTimeDiff(player)
-        dict = {
-            player: player,
-            time: timeAGO
-        }
-        results.push(dict)
+        row.player = player
+        row.time = timeAGO
+
+        console.log(row)
     }
-
-    return results
-
+    return halodb
 }
+
 module.exports.lastplayed = lastplayed
 
 async function getValidName(player) {
     return halo.getPlayer(player)
 }
 module.exports.getValidName = getValidName
+
+async function dumpLeaderboard() {
+    halo.getLeaderboard().then(async(results) => {
+        // console.log(results)
+
+        for (const player of results) {
+            timeAGO = await getTimeDiff(player.Player.Gamertag)
+            player._id = player.Player.Gamertag
+            player.updated = Date.now()
+            player.time = timeAGO
+        }
+
+        console.log(results)
+        db.insertValues(results, res => {
+            console.log(`Data successfully dumped.`)
+        })
+
+    }).catch(err => {
+        console.error(err)
+    })
+}
+module.exports.dumpLeaderboard = dumpLeaderboard
+
+dumpLeaderboard()

@@ -16,8 +16,8 @@ class App extends Component {
         const body = await response.json();
         if (response.status !== 200) 
             throw Error(body.message);
-        await this.setState({data: body})
-        console.log(response.url)
+        this.setState({data: body})
+        console.log(body)
         return body;
     };
 

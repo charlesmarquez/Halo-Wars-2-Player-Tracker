@@ -1,5 +1,6 @@
-config = require('../config');
-RateLimiter = require('request-rate-limiter');
+const config = require('../config');
+const RateLimiter = require('request-rate-limiter');
+const mongo = require('../connection/db');
 
 Array.prototype.hasmin = function (attrib) {
     return this.reduce(function (prev, curr) {
@@ -135,33 +136,47 @@ async function getLastGameID(player) {
 
 async function getPlayer(player = 'Mike BEASTon') {
 
-        var player = player
-        var playerName = player
+    var player = player
+    var playerName = player
 
-        var matchId = await getLastGameID(player);
+    var matchId = await getLastGameID(player);
 
-        var url = `https://www.haloapi.com/stats/hw2/matches/${matchId}/events`
-        const response = await getRequest(url);
-        const json = await getJson(response);
+    var url = `https://www.haloapi.com/stats/hw2/matches/${matchId}/events`
+    const response = await getRequest(url);
+    const json = await getJson(response);
 
-        events = json.GameEvents
+    events = json.GameEvents
 
 
-        for (const event of events) {
-            if (event.EventName == 'PlayerJoinedMatch') {
-                if (event.HumanPlayerId !== null) {
-                    playerName = event.HumanPlayerId.Gamertag;
-                    if (player.toUpperCase() === playerName.toUpperCase()) {
-                        return playerName
-                    }
-
+    for (const event of events) {
+        if (event.EventName == 'PlayerJoinedMatch') {
+            if (event.HumanPlayerId !== null) {
+                playerName = event.HumanPlayerId.Gamertag;
+                if (player.toUpperCase() === playerName.toUpperCase()) {
+                    return playerName
                 }
+
             }
         }
+    }
 }
 
 module.exports.getPlayer = getPlayer
 
+
+async function getLeaderboard() {
+    seasonId = '3527a6d6-29d6-485f-9be6-83a5881ce42c'
+    playlistId = '548d864e-8666-430e-9140-8dd2ad8fbfcd'
+    count = 250
+
+    req = await getRequest(`https://www.haloapi.com/stats/hw2/player-leaderboards/csr/${seasonId}/${playlistId}?count=${count}`)
+    json = await getJson(req)
+
+    results = json.Results
+
+    return results
+}
+module.exports.getLeaderboard = getLeaderboard
 
 async function parseMaps() {
     req = await getRequest(`https://www.haloapi.com/metadata/hw2/maps`)
@@ -283,9 +298,3 @@ var limiter = new RateLimiter({
 });
 
 console.log(`limiter initiated: ${limiter.rate} reqs per ${limiter.interval}s`);
-
-// x = async () => {
-//     gamertag = await getPlayer('l1am wh1te')
-// }
-// 
-// x()

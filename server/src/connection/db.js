@@ -36,6 +36,21 @@ async function insertValue(item) {
 }
 module.exports.insertValue = insertValue
 
+async function insertValues(item) {
+
+    conn = await getconn()
+    db = conn.db(dbname)
+
+    var coll = db.collection(collection)
+    coll.insertMany(item,(err, res) => {
+        if (err !== null){
+            console.error(err)
+        }
+    })
+    conn.close();
+}
+module.exports.insertValues = insertValues
+
 async function getValues() {
     conn = await getconn()
     db = conn.db(dbname)
