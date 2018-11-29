@@ -70,10 +70,14 @@ function time_ago(result) {
 async function getTimeDiff(playerName = 'Mike BEASTon') {
     const history = await halo.getHistory(1, playerName)
     for (res of history) {
-        timeDiff = time_ago(res)
-        return timeDiff
+        res.timeDiff = time_ago(res)
+        // return timeDiff
     }
+    console.log(history);
+    return history
 }
+
+getTimeDiff()
 
 /**
  * @function (lastplayed)
@@ -103,25 +107,44 @@ async function getValidName(player) {
 module.exports.getValidName = getValidName
 
 async function dumpLeaderboard() {
-    halo.getLeaderboard().then(async(results) => {
-        // console.log(results)
 
-        for (const player of results) {
-            timeAGO = await getTimeDiff(player.Player.Gamertag)
-            player._id = player.Player.Gamertag
-            player.updated = Date.now()
-            player.time = timeAGO
-        }
+    const playlistMap = [{
+            name: '3v3',
+            id: `4a2cedcc-9098-4728-886f-60649896278d`
+        },
+        {
+            name: '2v2',
+            id: `379f9ee5-92ec-45d9-b5e5-9f30236cab00`
+        },
+        {
+            name: '1v1',
+            id: `548d864e-8666-430e-9140-8dd2ad8fbfcd`
+        },
+    ]
 
-        console.log(results)
-        db.insertValues(results, res => {
-            console.log(`Data successfully dumped.`)
+    for (const playlist of playlistMap) {
+
+        
+        halo.getLeaderboard(playlist.id).then(async (results) => {
+
+            for (const player of results) {
+                timeAGO = await getTimeDiff(player.Player.Gamertag)
+                player._id = player.Player.Gamertag
+                player.updated = Date.now()
+                player.time = timeAGO
+                player.playlist = playlist.name
+            }
+
+            console.log(results)
+            // db.updateValues(results, res => {
+            //     console.log(`Data successfully dumped`)
+            // })
+
+        }).catch(err => {
+            console.error(err)
         })
-
-    }).catch(err => {
-        console.error(err)
-    })
+    }
 }
 module.exports.dumpLeaderboard = dumpLeaderboard
 
-dumpLeaderboard()
+// dumpLeaderboard()

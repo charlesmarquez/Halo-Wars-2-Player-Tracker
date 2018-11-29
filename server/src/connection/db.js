@@ -3,7 +3,9 @@ const assert = require('assert');
 const config = require('../config');
 
 const url = config.url
-const options = {useNewUrlParser: true}
+const options = {
+    useNewUrlParser: true
+}
 const dbname = config.dbname
 const collection = config.collection
 
@@ -42,8 +44,8 @@ async function insertValues(item) {
     db = conn.db(dbname)
 
     var coll = db.collection(collection)
-    coll.insertMany(item,(err, res) => {
-        if (err !== null){
+    coll.insertMany(item, (err, res) => {
+        if (err !== null) {
             console.error(err)
         }
     })
@@ -59,11 +61,40 @@ async function getValues() {
     var cursor = coll.find();
 
     x = await cursor.toArray()
-    
+
     conn.close();
     return x
 }
 module.exports.getValues = getValues
+
+/**
+ * @function {updateValues|void}
+ * 
+ * @param {Array of Dict}
+ * 
+ * @description
+ * Updates halo.playercsr collection in MongoDB Atlas
+ */
+
+async function updateValues(item) {
+
+    getconn().then(async (conn) => {
+        db = conn.db(dbname)
+        var coll = db.collection(collection)
+        
+        for (row of item) {
+            uid = row._id
+            coll.updateOne({_id: uid}, {$set: row}, {upsert:true})      
+        }
+
+        console.log(`Database Updated.`);
+
+        conn.close()
+    }).catch((err) => {
+        console.error(err);
+    });
+}
+module.exports.updateValues = updateValues
 
 function getconn() {
     var conn = mongo.connect(url, options)

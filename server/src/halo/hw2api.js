@@ -55,14 +55,18 @@ async function getHistory(count = 50, player = 'aykonz sidekick') {
     // console.log(response)
 
     events.forEach(element => {
+        console.log(element);
 
         matchId = element['MatchId'];
         map = element['MapId'];
         matchTypeId = element['MatchType'];
         matchStartISO = element['MatchStartDate']['ISO8601Date']
         PlayerMatchDuration = element['PlayerMatchDuration']
+        playlistId = element.PlaylistId
+        mmr = element.RatingProgress.UpdatedMmr.Rating
 
         matchStart = matchDate(matchStartISO)
+
         // mapsArr.forEach(mapdict => {
         //     if (map in mapdict) {
         //         mapName = mapdict[map]
@@ -79,10 +83,12 @@ async function getHistory(count = 50, player = 'aykonz sidekick') {
             matchStart: matchStart,
             matchStartISO: matchStartISO,
             PlayerMatchDuration: PlayerMatchDuration,
-            matchType: matchType
+            matchType: matchType,
+            playlistId: playlistId,
+            mmr: mmr
         })
     }, err => {
-        // console.error(err)
+        console.error(err)
     })
 
     return matchDict
@@ -164,10 +170,9 @@ async function getPlayer(player = 'Mike BEASTon') {
 module.exports.getPlayer = getPlayer
 
 
-async function getLeaderboard() {
+async function getLeaderboard(playlistId = '548d864e-8666-430e-9140-8dd2ad8fbfcd') {
     seasonId = '3527a6d6-29d6-485f-9be6-83a5881ce42c'
-    playlistId = '548d864e-8666-430e-9140-8dd2ad8fbfcd'
-    count = 250
+    count = 10
 
     req = await getRequest(`https://www.haloapi.com/stats/hw2/player-leaderboards/csr/${seasonId}/${playlistId}?count=${count}`)
     json = await getJson(req)
