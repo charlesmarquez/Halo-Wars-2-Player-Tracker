@@ -23,10 +23,9 @@ app.post('/api/world', (req, res) => {
 });
 
 app.get('/api/players', async (req, res) => {
-  var data = await hw2.lastplayed()
-
+  data = await db.getValues()
   data.sort(function (a, b) {
-    return a.time.seconds - b.time.seconds
+      return a.history.custom.timeAgo.seconds - b.history.custom.timeAgo.seconds
   })
   res.send(data)
 });

@@ -8,14 +8,7 @@ export default class datatable extends Component {
         super()
 
         this.state = {
-            data: {
-                player: 'Loading ...',
-                time: {
-                    timeago: '...',
-                    seconds: '...',
-                    matchType: '...'
-                }
-            }
+            data: {}
         }
     }
 
@@ -64,7 +57,7 @@ export default class datatable extends Component {
                         .from(this.state.data)
                         .map(row => (
                             <AnimateOnChange
-                                baseClassName={(row.time.seconds < 3600)
+                                baseClassName={(row.history.custom.timeAgo.seconds < 3600)
                                 ? "row online"
                                 : "row"}
                                 key = {uuidv4()}
@@ -72,9 +65,10 @@ export default class datatable extends Component {
                                 customTag="div"
                                 animate={true}
                                 >
-                                <div className="cell">{row.player}</div>
-                                <div className="cell">{row.time.timeago}</div>
-                                <div className="cell">{row.time.matchType}</div>
+                                <div className="cell">{row.Player.Gamertag}</div>
+                                <div className="cell">{row.history.custom.timeAgo.timeago}</div>
+                                <div className="cell">{row.history.custom.matchType}</div>
+                               
                             </AnimateOnChange>
                         ))}
                 </div>

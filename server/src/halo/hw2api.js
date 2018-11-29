@@ -55,43 +55,40 @@ async function getHistory(count = 50, player = 'aykonz sidekick') {
     // console.log(response)
 
     events.forEach(element => {
-        console.log(element);
 
-        matchId = element['MatchId'];
-        map = element['MapId'];
-        matchTypeId = element['MatchType'];
-        matchStartISO = element['MatchStartDate']['ISO8601Date']
-        PlayerMatchDuration = element['PlayerMatchDuration']
-        playlistId = element.PlaylistId
-        mmr = element.RatingProgress.UpdatedMmr.Rating
+        // matchId = element['MatchId'];
+        // map = element['MapId'];
+        // matchTypeId = element['MatchType'];
+        // matchStartISO = element['MatchStartDate']['ISO8601Date']
+        // PlayerMatchDuration = element['PlayerMatchDuration']
+        // playlistId = element.PlaylistId
+        // mmr = element.UpdatedMmr.Rating
 
+        matchStartISO = element.MatchStartDate.ISO8601Date
         matchStart = matchDate(matchStartISO)
 
-        // mapsArr.forEach(mapdict => {
-        //     if (map in mapdict) {
-        //         mapName = mapdict[map]
-        //     }
-        // })
+        mapsArr.forEach(mapdict => {
+            if (element.MapId in mapdict) {
+                mapName = mapdict[map]
+            }
+        })
 
+        matchTypeId = element.MatchType
         if (matchTypeId in matchTypeArr) {
             matchType = matchTypeArr[matchTypeId]
         }
 
-        // matches.push(mapName)
-        matchDict.push({
-            matchId: matchId,
-            matchStart: matchStart,
-            matchStartISO: matchStartISO,
-            PlayerMatchDuration: PlayerMatchDuration,
+        element.custom = {
             matchType: matchType,
-            playlistId: playlistId,
-            mmr: mmr
-        })
+            matchStart: matchStart,
+            mapName: mapName
+        }
+
     }, err => {
         console.error(err)
     })
 
-    return matchDict
+    return events[0]
     // html.showList(matchDict, 'matchhistory')
 }
 module.exports.getHistory = getHistory

@@ -4,6 +4,20 @@ const en = require('javascript-time-ago/locale/en');
 const halo = require('./hw2api');
 const db = require('../connection/db');
 
+const playlistMap = [{
+        name: '3v3',
+        id: `4a2cedcc-9098-4728-886f-60649896278d`
+    },
+    {
+        name: '2v2',
+        id: `379f9ee5-92ec-45d9-b5e5-9f30236cab00`
+    },
+    {
+        name: '1v1',
+        id: `548d864e-8666-430e-9140-8dd2ad8fbfcd`
+    },
+]
+
 
 function formatDuration(duration) {
     patternh = /(\d+)H(\d+)M(\d+)./g;
@@ -37,23 +51,6 @@ function formatDuration(duration) {
     return duration_time.total * 1000
 }
 
-function time_ago(result) {
-    timeStart = new Date(result.matchStartISO) //
-    timenow = Date.now()
-    duration = result.PlayerMatchDuration
-    duration = formatDuration(duration)
-
-    TimeAgo.addLocale(en)
-    timeAgo = new TimeAgo('en-US')
-    diffms = timenow - timeStart - duration
-
-    diff = timeAgo.format(Date.now() - diffms)
-    return {
-        seconds: Math.floor(diffms / 1000),
-        timeago: diff,
-        matchType: matchType
-    }
-}
 
 /**
  * @function (getTimeDiff|String)
@@ -67,17 +64,45 @@ function time_ago(result) {
  * @returns (String) Time-ago of last game.
  */
 
-async function getTimeDiff(playerName = 'Mike BEASTon') {
+async function getHistoryData(playerName = 'Mike BEASTon') {
     const history = await halo.getHistory(1, playerName)
-    for (res of history) {
-        res.timeDiff = time_ago(res)
-        // return timeDiff
-    }
-    console.log(history);
+
+    history.custom.timeAgo = time_ago(history)
+    history.custom.matchPlaylist = getPlaylist(history)
+
     return history
 }
 
-getTimeDiff()
+function getPlaylist(result) {
+    var id = result.PlaylistId
+
+    if (result.custom.matchType == 'Matchmaking') {
+        for (x of playlistMap) {
+            if (x.id == id) {
+                return x.name
+            }
+        }
+    }
+
+    return "N/A"
+}
+
+function time_ago(result) {
+    timeStart = new Date(result.MatchStartDate.ISO8601Date) //
+    timenow = Date.now()
+    duration = result.PlayerMatchDuration
+    duration = formatDuration(duration)
+
+    TimeAgo.addLocale(en)
+    timeAgo = new TimeAgo('en-US')
+    diffms = timenow - timeStart - duration
+
+    diff = timeAgo.format(Date.now() - diffms)
+    return {
+        seconds: Math.floor(diffms / 1000),
+        timeago: diff
+    }
+}
 
 /**
  * @function (lastplayed)
@@ -108,37 +133,20 @@ module.exports.getValidName = getValidName
 
 async function dumpLeaderboard() {
 
-    const playlistMap = [{
-            name: '3v3',
-            id: `4a2cedcc-9098-4728-886f-60649896278d`
-        },
-        {
-            name: '2v2',
-            id: `379f9ee5-92ec-45d9-b5e5-9f30236cab00`
-        },
-        {
-            name: '1v1',
-            id: `548d864e-8666-430e-9140-8dd2ad8fbfcd`
-        },
-    ]
-
     for (const playlist of playlistMap) {
 
-        
         halo.getLeaderboard(playlist.id).then(async (results) => {
 
             for (const player of results) {
-                timeAGO = await getTimeDiff(player.Player.Gamertag)
-                player._id = player.Player.Gamertag
+                player.history = await getHistoryData(player.Player.Gamertag) // Returns Match History response + custom attrs
                 player.updated = Date.now()
-                player.time = timeAGO
-                player.playlist = playlist.name
+                player._id = player.Player.Gamertag
+
             }
 
-            console.log(results)
-            // db.updateValues(results, res => {
-            //     console.log(`Data successfully dumped`)
-            // })
+            db.updateValues(results, res => {
+                console.log(`Data successfully dumped`)
+            })
 
         }).catch(err => {
             console.error(err)
@@ -146,5 +154,3 @@ async function dumpLeaderboard() {
     }
 }
 module.exports.dumpLeaderboard = dumpLeaderboard
-
-// dumpLeaderboard()
