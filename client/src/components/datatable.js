@@ -47,31 +47,42 @@ export default class datatable extends Component {
                 <PlayerForm></PlayerForm>
                 <br/>
                 <button onClick={this.setData} className="btn btn-info btn-block">Refresh</button>
-                <div className="table">
-                    <div className="row header">
-                        <div className="cell">Player</div>
-                        <div className="cell">Time Ago</div>
-                        <div className="cell">Match Type</div>
-                    </div>
+                <table className="display">
+                    <thead className="">
+                    <tr>
+                        <th>Player</th>
+                        <th>Time Ago</th>
+                        <th>Match Type</th>
+                        <th>Player</th>
+                        <th>Time Ago</th>
+                        <th>Match Type</th>
+                    </tr>
+                    </thead>
+                    <tbody>
                     {Array
                         .from(this.state.data)
                         .map(row => (
                             <AnimateOnChange
                                 baseClassName={(row.history.custom.timeAgo.seconds < 3600)
-                                ? "row online"
-                                : "row"}
+                                ? "online"
+                                : ""}
                                 key = {uuidv4()}
                                 animationClassName='fadeinRow'
-                                customTag="div"
+                                customTag="tr"
                                 animate={true}
                                 >
-                                <div className="cell">{row.Player.Gamertag}</div>
-                                <div className="cell">{row.history.custom.timeAgo.timeago}</div>
-                                <div className="cell">{row.history.custom.matchType}</div>
+                                    
+                                <td className="cell">{row.Player.Gamertag}</td>
+                                <td className="cell">{row.history.custom.timeAgo.timeago}</td>
+                                <td className="cell">{row.history.custom.matchType}</td>
+                                <td className="cell">{row.Player.Gamertag}</td>
+                                <td className="cell">{row.history.custom.timeAgo.timeago}</td>
+                                <td className="cell">{row.history.custom.matchType}</td>
                                
                             </AnimateOnChange>
                         ))}
-                </div>
+                    </tbody>
+                </table>
             </div>
         )
     }

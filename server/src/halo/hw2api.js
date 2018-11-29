@@ -63,15 +63,15 @@ async function getHistory(count = 50, player = 'aykonz sidekick') {
         // PlayerMatchDuration = element['PlayerMatchDuration']
         // playlistId = element.PlaylistId
         // mmr = element.UpdatedMmr.Rating
-
-        matchStartISO = element.MatchStartDate.ISO8601Date
+        
         matchStart = matchDate(matchStartISO)
+        mapName = null
 
-        mapsArr.forEach(mapdict => {
-            if (element.MapId in mapdict) {
-                mapName = mapdict[map]
-            }
-        })
+        // mapsArr.forEach(mapdict => {
+            // if (element.MapId in mapdict) {
+                // mapName = mapdict[map]
+            // }
+        // })
 
         matchTypeId = element.MatchType
         if (matchTypeId in matchTypeArr) {

@@ -17,7 +17,6 @@ class App extends Component {
         if (response.status !== 200) 
             throw Error(body.message);
         this.setState({data: body})
-        console.log(body)
         return body;
     };
 
@@ -25,9 +24,6 @@ class App extends Component {
         return (
             <div className="App" key='p'>
                 <strong>Halo Player Tracker</strong>
-                <div className="limiter" key='o'>
-                    <div className="container-table100" key= 'm'>
-                        <div className="wrap-table100" key='l'>
                             <DataTable
                                 name="DataTable"
                                 callApi={this
@@ -35,9 +31,6 @@ class App extends Component {
                                 .bind(this)}
                                 data={this.state.data}></DataTable>
                         </div>
-                    </div>
-                </div>
-            </div>
         );
     }
 }
