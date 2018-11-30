@@ -6,44 +6,42 @@ import ReactTable from 'react-table'
 import "react-table/react-table.css";
 
 const columns = [
-    {
-      Header: "Name",
-      columns: [
         {
-          Header: "First Name",
-          accessor: "firstName"
+          Header: "Player",
+          accessor: "Player.Gamertag"
         },
         {
-          Header: "Last Name",
-          id: "lastName",
-          accessor: d => d.lastName
-        }
-      ]
-    },
-    {
-      Header: "Info",
-      columns: [
-        {
-          Header: "Age",
-          accessor: "age"
+          Header: "Last Online (s)",
+          accessor: "history.custom.timeAgo.seconds",
         },
         {
-          Header: "Status",
-          accessor: "status"
+          Header: "Match Type",
+          accessor: "history.custom.matchType"
         }
-      ]
-    },
-    {
-      Header: "Stats",
-      columns: [
-        {
-          Header: "Visits",
-          accessor: "visits"
-        }
-      ]
-    }
   ];
 
+const subComp = [
+  {
+    Header: "Gamertag",
+    accessor: "Player.Gamertag"
+  },
+  {
+    Header: "Gamertag",
+    accessor: "Player.Gamertag"
+  },
+  {
+    Header: "Gamertag",
+    accessor: "Player.Gamertag"
+  },
+  {
+    Header: "Gamertag",
+    accessor: "Player.Gamertag"
+  },
+  {
+    Header: "Gamertag",
+    accessor: "Player.Gamertag"
+  }
+];
 
 export default class datatable extends Component {
     constructor() {
@@ -90,19 +88,16 @@ export default class datatable extends Component {
                 columns={columns}
                 defaultPageSize={10}
                 className="-striped -highlight"
-                SubComponent={row => {
+                SubComponent={row => {console.log([row.original])
                   return (
-                    <div style={{ padding: "20px" }}>
+                    <div style={{ padding: "10px" }}>
                       <em>
-                        You can put any component you want here, even another React
-                        Table!
+                        Latest Match Details
                       </em>
-                      <br />
-                      <br />
                       <ReactTable
-                        data={this.state.data}
-                        columns={columns}
-                        defaultPageSize={3}
+                        data={[row.original]}
+                        columns={subComp}
+                        defaultPageSize={1}
                         showPagination={false}
                         SubComponent={row => {
                           return (
