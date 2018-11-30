@@ -9,31 +9,25 @@ Array.prototype.hasmin = function (attrib) {
 }
 
 keydict = initKeys()
-// console.log(keydict);
 
 var limiter = new RateLimiter({
     rate: config.keys.length * 10,
     interval: 10,
-    backoffTime: 1,
+    backoffTime: 3,
 });
-
-const mapArr = [ { 'rostermode\\design\\RM_EvenFlowNight\\RM_EvenFlowNight': 'Infinite Coast Reskin Night' },
-{ 'rostermode\\design\\RM_EvenFlow_Desert\\RM_EvenFlow_Desert': 'Infinite Coast Reskin Desert' },
-{ 'skirmish\\design\\Ep02_M03\\Ep02_M03': 'FISSURES' },
-{ 'skirmish\\design\\MC_EnforcerValley\\MC_EnforcerValley': 'MIRAGE' },
-{ 'skirmish\\design\\FF_StopTheSignal\\FF_StopTheSignal': 'HIGH BASTION - HW2 Map' },
-{ 'skirmish\\design\\MP_Eagle\\MP_Eagle': 'BADLANDS' },
-{ 'skirmish\\design\\MP_Bridges\\MP_Bridges': 'FRONTIER' },
-{ 'skirmish\\design\\MP_Razorblade\\MP_Razorblade': 'BEDROCK' },
-{ 'skirmish\\design\\MP_Ricochet\\MP_Ricochet': 'SENTRY' },
-{ 'skirmish\\design\\MP_Caldera\\MP_Caldera': 'ASHES' },
-{ 'skirmish\\design\\MP_Boneyard\\MP_Boneyard': 'HIGHWAY' },
-{ 'skirmish\\design\\MP_Veteran\\MP_Veteran': 'VAULT' },
-{ 'rostermode\\design\\RM_EvenFlowArt\\RM_EvenFlowArt': 'Infinite Coast' },
-{ 'skirmish\\design\\MP_Fracture\\MP_Fracture': 'RIFT' } ]
 
 console.log(`limiter initiated: ${limiter.rate} reqs per ${limiter.interval}s`);
 
+/**
+ * @function getRequest
+ * 
+ * @param {url | string}
+ * 
+ * @description
+ * Processes requests, utilizes getKey to allow usage of multiple API keys 
+ * 
+ * @returns {response | HTTP Response}
+ */
 async function getRequest(url) {
     const options = {
         url: url,
@@ -51,26 +45,34 @@ async function getRequest(url) {
         case 200:
             return response
         default:
-            throw "Invalid Response.";
+            console.error(options.headers);
+            throw `Invalid Response. ${response.statusCode}`;
     }
 }
 
+/**
+ * @function getJson 
+ * 
+ * @param {response | HTTP Response}
+ * 
+ * @description
+ * Provides JSON object for provide response
+ * 
+ * @returns {json | JSON object}
+ */
 async function getJson(response) {
     json = JSON.parse(response.body);
     return json;
 }
 
-async function getHistory(count = 50, player = 'aykonz sidekick') {
+async function getHistory(count = 1, player = 'aykonz sidekick') {
 
     var url = `https://www.haloapi.com/stats/hw2/players/${player}/matches?start=1&count=${count}`
     const response = await getRequest(url);
     const json = await getJson(response);
 
-    var matches = [];
-    var matchDict = [];
-    var events = json['Results'];
+    var events = json.Results;
 
-    // mapsArr = await parseMaps();
     matchTypeArr = {
         0: `Unknown`,
         1: `Campaign`,
@@ -78,26 +80,7 @@ async function getHistory(count = 50, player = 'aykonz sidekick') {
         3: `Matchmaking`
     };
 
-    // console.log(response)
-
-    events.forEach(element => {
-
-        // matchId = element['MatchId'];
-        // map = element['MapId'];
-        // matchTypeId = element['MatchType'];
-        // matchStartISO = element['MatchStartDate']['ISO8601Date']
-        // PlayerMatchDuration = element['PlayerMatchDuration']
-        // playlistId = element.PlaylistId
-        // mmr = element.UpdatedMmr.Rating
-        
-        matchStart = matchDate(matchStartISO)
-        mapName = null
-
-        // mapsArr.forEach(mapdict => {
-            // if (element.MapId in mapdict) {
-                // mapName = mapdict[map]
-            // }
-        // })
+    events.forEach(async (element) => {
 
         matchTypeId = element.MatchType
         if (matchTypeId in matchTypeArr) {
@@ -105,9 +88,7 @@ async function getHistory(count = 50, player = 'aykonz sidekick') {
         }
 
         element.custom = {
-            matchType: matchType,
-            matchStart: matchStart,
-            mapName: mapName
+            matchType: matchType
         }
 
     }, err => {
@@ -115,7 +96,6 @@ async function getHistory(count = 50, player = 'aykonz sidekick') {
     })
 
     return events[0]
-    // html.showList(matchDict, 'matchhistory')
 }
 module.exports.getHistory = getHistory
 
@@ -155,6 +135,71 @@ async function getPlayerSummary(player = 'mike beaston', id = 'right-content') {
 }
 module.exports.getPlayerSummary = getPlayerSummary
 
+async function getSeasonStats(player = 'mike beaston', seasonId = '3527a6d6-29d6-485f-9be6-83a5881ce42c') {
+
+    const url = `https://www.haloapi.com/stats/hw2/players/${player}/stats/seasons/${seasonId}`
+
+    const response = await getRequest(url);
+    const json = await getJson(response);
+    seasonRanked = {}
+
+    const playlistMap = config.playlists
+
+    for (x of playlistMap) {
+        results = json.RankedPlaylistStats.find(res => {
+            return res.PlaylistId == x.id
+        })
+
+        if (typeof results !== 'undefined') {
+            results.PlaylistName = x.name
+            seasonRanked[results.PlaylistName] = (results)
+        }
+    }
+
+    // console.log(seasonRanked)
+    return seasonRanked
+}
+module.exports.getSeasonStats = getSeasonStats
+
+// getSeasonStats()
+
+/**
+ * @function {getPlaylistStats}
+ * 
+ * @param {player | String}
+ * 
+ * @description
+ * Contains MMR and RAW CSR values. Looks at 1v1, 2v2, 3v3
+ * 
+ * @todo
+ * Uses 3 requests per player. Has potential to query 6 players per request. OPTIMIZE.
+ */
+
+async function getPlaylistStats(player = 'admiration') {
+
+    const playlistMap = config.playlists
+
+    stats = {}
+
+    for (x of playlistMap) {
+        const url = `https://www.haloapi.com/stats/hw2/playlist/${x.id}/rating?players=${player}`
+        const response = await getRequest(url);
+        const json = await getJson(response);
+
+        res = json.Results[0].Result
+        stats[x.name] = res
+    }
+    return stats
+}
+module.exports.getPlaylistStats = getPlaylistStats
+
+test = async () => {
+    x = await getPlaylistStats()
+    console.log(x)
+}
+
+test()
+
 async function getLastGameID(player) {
     var url = `https://www.haloapi.com/stats/hw2/players/${player}/matches?start=1&count=1`
 
@@ -176,7 +221,6 @@ async function getPlayer(player = 'Mike BEASTon') {
 
     events = json.GameEvents
 
-
     for (const event of events) {
         if (event.EventName == 'PlayerJoinedMatch') {
             if (event.HumanPlayerId !== null) {
@@ -184,18 +228,15 @@ async function getPlayer(player = 'Mike BEASTon') {
                 if (player.toUpperCase() === playerName.toUpperCase()) {
                     return playerName
                 }
-
             }
         }
     }
 }
-
 module.exports.getPlayer = getPlayer
-
 
 async function getLeaderboard(playlistId = '548d864e-8666-430e-9140-8dd2ad8fbfcd') {
     seasonId = '3527a6d6-29d6-485f-9be6-83a5881ce42c'
-    count = 10
+    count = 3
 
     req = await getRequest(`https://www.haloapi.com/stats/hw2/player-leaderboards/csr/${seasonId}/${playlistId}?count=${count}`)
     json = await getJson(req)
@@ -210,39 +251,9 @@ async function parseMaps() {
     req = await getRequest(`https://www.haloapi.com/metadata/hw2/maps`)
     json = await getJson(req)
 
-    results = json['ContentItems']
-    maps = []
-
-    results.forEach(x => {
-        title = x.View.Title
-        mapId = x.View.HW2Map.ID
-
-        maps.push({
-            [mapId]: title
-        })
-    })
-    return maps
+    return json
 }
-
-function matchDate(isotime) {
-    x = new Date(isotime)
-    month = x.getUTCMonth() + 1
-    date1 = x.getUTCDate()
-    year = x.getUTCFullYear()
-    time = x.toLocaleTimeString('en-US', {
-        hour12: true
-    })
-
-    date = `${month}/${date1}/${year}`
-    time = `${time}`
-
-    results = {
-        date: date,
-        time: time
-    }
-
-    return results
-}
+module.exports.parseMaps = parseMaps
 
 function initKeys() {
     apikeys = config.keys
@@ -263,7 +274,7 @@ function initKeys() {
 }
 
 async function getKey(keydict) {
-    key = Array.from(keydict).hasmin('called')
+    var key = Array.from(keydict).hasmin('called')
 
     if (key.status) {
         if (key.called < 10) {
@@ -276,7 +287,6 @@ async function getKey(keydict) {
             resetKeys(keydict)
         }
     }
-
     return result
 }
 
@@ -314,6 +324,3 @@ function testkeys() {
         // console.log(`using: ${apikey}`);
     }
 }
-
-
-getMaps()

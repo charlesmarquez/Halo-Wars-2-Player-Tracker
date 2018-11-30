@@ -3,6 +3,7 @@ const TimeAgo = require('javascript-time-ago');
 const en = require('javascript-time-ago/locale/en');
 const halo = require('./hw2api');
 const db = require('../connection/db');
+const config = require('../config');
 
 const playlistMap = [{
         name: '3v3',
@@ -18,6 +19,7 @@ const playlistMap = [{
     },
 ]
 
+var mapsPromise = halo.parseMaps()
 
 function formatDuration(duration) {
     patternh = /(\d+)H(\d+)M(\d+)./g;
@@ -51,26 +53,24 @@ function formatDuration(duration) {
     return duration_time.total * 1000
 }
 
-
-/**
- * @function (getTimeDiff|String)
- * 
- * @param playerName
- * Gamertag to be tracked.
- * 
- * @description (1 API Request) 
- * Provides time since last game completed on match history.
- * 
- * @returns (String) Time-ago of last game.
- */
-
 async function getHistoryData(playerName = 'Mike BEASTon') {
     const history = await halo.getHistory(1, playerName)
 
     history.custom.timeAgo = time_ago(history)
     history.custom.matchPlaylist = getPlaylist(history)
+    history.custom.mapMetadata = await getMapMeta(history)
+
+    // console.log(history);
 
     return history
+}
+
+async function getMapMeta(element) {
+    mapData = await mapsPromise
+    mapMetadata = mapData.ContentItems.find(item => {
+        return (item.View.HW2Map.ID == element.MapId)
+    })
+    return mapMetadata
 }
 
 function getPlaylist(result) {
@@ -97,10 +97,15 @@ function time_ago(result) {
     timeAgo = new TimeAgo('en-US')
     diffms = timenow - timeStart - duration
 
+    durMin = Math.floor(duration / 1000 / 60)
+    durSec = Math.floor((duration - durMin * 1000 * 60) / 1000)
+
+
     diff = timeAgo.format(Date.now() - diffms)
     return {
         seconds: Math.floor(diffms / 1000),
-        timeago: diff
+        timeago: diff,
+        duration: `${durMin}:${durSec}`
     }
 }
 
@@ -133,19 +138,33 @@ module.exports.getValidName = getValidName
 
 async function dumpLeaderboard() {
 
-    for (const playlist of playlistMap) {
-
+    for (const playlist of config.playlists) {
         halo.getLeaderboard(playlist.id).then(async (results) => {
-
             for (const player of results) {
+
+                player.leaderboard = {
+                    score: player.Score,
+                    rank: player.Rank,
+                    playlist: playlist
+                }
+
+                delete player.Score
+                delete player.Rank
+                
                 player.history = await getHistoryData(player.Player.Gamertag) // Returns Match History response + custom attrs
+                player.season = await halo.getSeasonStats(player.Player.Gamertag)
+                player.mmr = await halo.getPlaylistStats(player.Player.Gamertag)
+
                 player.updated = Date.now()
                 player._id = player.Player.Gamertag
 
+                // console.log(player)
             }
 
+            console.log(results);
+
             db.updateValues(results, res => {
-                console.log(`Data successfully dumped`)
+            console.log(`Data successfully dumped`)
             })
 
         }).catch(err => {
@@ -154,3 +173,5 @@ async function dumpLeaderboard() {
     }
 }
 module.exports.dumpLeaderboard = dumpLeaderboard
+
+dumpLeaderboard()
