@@ -39,7 +39,7 @@ const columns = [
           textAlign: "center" }}
           value={filter ? filter.value : "all"}
         >
-          <option value="all">Show All</option>
+          <option value="">Show All</option>
           <option value="1v1">1v1</option>
           <option value="2v2">2v2</option>
           <option value="3v3">3v3</option>
