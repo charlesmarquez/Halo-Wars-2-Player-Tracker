@@ -5,20 +5,6 @@ const halo = require('./hw2api');
 const db = require('../connection/db');
 const config = require('../config');
 
-const playlistMap = [{
-        name: '3v3',
-        id: `4a2cedcc-9098-4728-886f-60649896278d`
-    },
-    {
-        name: '2v2',
-        id: `379f9ee5-92ec-45d9-b5e5-9f30236cab00`
-    },
-    {
-        name: '1v1',
-        id: `548d864e-8666-430e-9140-8dd2ad8fbfcd`
-    },
-]
-
 var mapsPromise = halo.parseMaps()
 
 function formatDuration(duration) {
@@ -77,7 +63,7 @@ function getPlaylist(result) {
     var id = result.PlaylistId
 
     if (result.custom.matchType == 'Matchmaking') {
-        for (x of playlistMap) {
+        for (x of config.playlists) {
             if (x.id == id) {
                 return x.name
             }
@@ -136,42 +122,53 @@ async function getValidName(player) {
 }
 module.exports.getValidName = getValidName
 
-async function dumpLeaderboard() {
+async function dumpLeaderboardAll(playlist) {
 
-    for (const playlist of config.playlists) {
-        halo.getLeaderboard(playlist.id).then(async (results) => {
-            for (const player of results) {
-
-                player.leaderboard = {
-                    score: player.Score,
-                    rank: player.Rank,
-                    playlist: playlist
-                }
-
-                delete player.Score
-                delete player.Rank
-                
-                player.history = await getHistoryData(player.Player.Gamertag) // Returns Match History response + custom attrs
-                player.season = await halo.getSeasonStats(player.Player.Gamertag)
-                player.mmr = await halo.getPlaylistStats(player.Player.Gamertag)
-
-                player.updated = Date.now()
-                player._id = player.Player.Gamertag
-
-                // console.log(player)
-            }
-
-            console.log(results);
-
-            db.updateValues(results, res => {
-            console.log(`Data successfully dumped`)
-            })
-
-        }).catch(err => {
-            console.error(err)
+    halo.getLeaderboard(playlist).then(async (results) => {
+        for (const player of results) {
+            delete player.Score
+            delete player.Rank
+            player.history = await getHistoryData(player.Player.Gamertag) // Returns Match History response + custom attrs
+            player.season = await halo.getSeasonStats(player.Player.Gamertag)
+            player.mmr = await halo.getPlaylistStats(player.Player.Gamertag)
+            player.updated = Date.now()
+            player._id = player.Player.Gamertag
+            console.log(player._id)
+        }
+        db.updateValues(results, res => {
+        console.log(`Data successfully dumped`)
         })
-    }
+    }).catch(err => {
+        console.error(err)
+    })
 }
-module.exports.dumpLeaderboard = dumpLeaderboard
 
-dumpLeaderboard()
+module.exports.dumpLeaderboardAll = dumpLeaderboardAll
+
+
+async function dumpLeaderboardHistory(playlist) {
+
+    console.log(`Starting Leaderboard dump for playlist ${playlist}`)
+
+    halo.getLeaderboard(playlist).then(async (results) => {
+        for (const player of results) {
+            delete player.Score
+            delete player.Rank
+            player.history = await getHistoryData(player.Player.Gamertag) // Returns Match History response + custom attrs
+            // player.season = await halo.getSeasonStats(player.Player.Gamertag)
+            // player.mmr = await halo.getPlaylistStats(player.Player.Gamertag)
+            player.updated = Date.now()
+            player._id = player.Player.Gamertag
+        }
+        db.updateValues(results, res => {
+        console.log(`Data successfully dumped`)
+        })
+    }).catch(err => {
+        console.error(err)
+    })
+}
+module.exports.dumpLeaderboardHistory = dumpLeaderboardHistory
+
+// dumpLeaderboardAll('548d864e-8666-430e-9140-8dd2ad8fbfcd')
+// dumpLeaderboardAll('379f9ee5-92ec-45d9-b5e5-9f30236cab00')
+// dumpLeaderboardAll('4a2cedcc-9098-4728-886f-60649896278d')

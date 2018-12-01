@@ -1,21 +1,55 @@
 import React, {Component} from 'react'
-import AnimateOnChange from 'react-animate-on-change'
-import PlayerForm from "./PlayerForm";
-import uuidv4 from 'uuid/v4'
 import ReactTable from 'react-table'
+import Timer from './timer'
 import "react-table/react-table.css";
+import matchSorter from 'match-sorter'
 
 const columns = [
     {
         Header: "Player",
-        accessor: "Player.Gamertag"
+        accessor: "Player.Gamertag",
     }, {
         Header: "Last Online (s)",
         accessor: "history.custom.timeAgo.seconds",
+        id: 'timeago',
+        filterMethod: (filter, row) => {
+            if (filter.value === "all") {
+              return true;
+            }
+            if (filter.value === "true") {
+              return row[filter.id] > 3600;
+            }
+            return row[filter.id] < 86400;
+          },
+          Filter: ({ filter, onChange }) =>
+        <select
+          onChange={event => onChange(event.target.value)}
+          style={{ width: "40%",
+          textAlign: "center" }}
+          value={filter ? filter.value : "all"}
+        >
+          <option value="all">Show All</option>
+          <option value="3600">{`< Hour`}</option>
+          <option value="86400">{`< Day`}</option>
+        </select>,
         Cell: props => <div>{(props.row._original.history.custom.timeAgo.timeago)}</div>
     }, {
         Header: "Match Type",
-        accessor: "history.custom.matchType"
+        accessor: "history.custom.matchPlaylist",
+        Filter: ({ filter, onChange }) =>
+        <select
+          onChange={event => onChange(event.target.value)}
+          style={{ width: "40%",
+          textAlign: "center" }}
+          value={filter ? filter.value : "all"}
+        >
+          <option value="all">Show All</option>
+          <option value="1v1">1v1</option>
+          <option value="2v2">2v2</option>
+          <option value="3v3">3v3</option>
+          <option value="N/A">Custom</option>
+        </select>,
+        Cell: props => <div>{props.value === 'N/A' ? 'Custom' : `${props.value}, MMR: ${props.row._original.mmr[props.value].Mmr.Rating.toFixed(4)}`}</div>
     }
 ];
 
@@ -31,30 +65,34 @@ const subCompMatch = [
     }, {
         Header: "Outcome",
         sortable: false,
-        accessor: "x"
+        accessor: "history.PlayerMatchOutcome",
+        Cell: props => <div>{(props.value < 2)
+                    ? 'WIN'
+                    : 'LOSS'}</div>
     }
 ];
 const subCompStats = [
     {
-        Header: "MMR",
-        columns: [
-            {
-                Header: "1v1",
-                accessor: "mmr.1v1.Mmr.Rating",
-                sortable: false,
-                Cell: props => <div>{(typeof props.value !== 'undefined') ? (props.value).toFixed(4) : 'Not Available'}</div>
-            }, {
-                Header: "2v2",
-                accessor: "mmr.2v2.Mmr.Rating",
-                sortable: false,
-                Cell: props => <div>{(typeof props.value !== 'undefined') ? (props.value).toFixed(4) : 'Not Available'}</div>
-            }, {
-                Header: "3v3",
-                accessor: "mmr.3v3.Mmr.Rating",
-                sortable: false,
-                Cell: props => <div>{(typeof props.value !== 'undefined') ? (props.value).toFixed(4) : 'Not Available'}</div>
-            }
-        ]
+        Header: "1v1",
+        accessor: "mmr.1v1.Mmr.Rating",
+        sortable: false,
+        Cell: props => <div>{(typeof props.value !== 'undefined')
+                    ? (props.value).toFixed(4)
+                    : 'Not Available'}</div>
+    }, {
+        Header: "2v2",
+        accessor: "mmr.2v2.Mmr.Rating",
+        sortable: false,
+        Cell: props => <div>{(typeof props.value !== 'undefined')
+                    ? (props.value).toFixed(4)
+                    : 'Not Available'}</div>
+    }, {
+        Header: "3v3",
+        accessor: "mmr.3v3.Mmr.Rating",
+        sortable: false,
+        Cell: props => <div>{(typeof props.value !== 'undefined')
+                    ? (props.value).toFixed(4)
+                    : 'Not Available'}</div>
     }
 ]
 
@@ -67,17 +105,15 @@ export default class datatable extends Component {
     }
 
     componentDidMount = () => {
-        this
-            .props
-            .callApi()
-            .then(res => {
-                this.setState({data: res})
-            })
+        this.setData()
+
+        setInterval(() => {
+            console.log('Refreshing ..')
+            this.setData()
+        }, 60000);
     }
 
-    componentDidUpdate = (prevState) => {
-        // console.log(prevState.data)
-    }
+    componentDidUpdate = (prevState) => {}
 
     setData = async() => {
         this
@@ -86,7 +122,6 @@ export default class datatable extends Component {
             .then(res => {
                 this.setState({data: res})
             })
-
     }
 
     handleChange = (event) => {
@@ -94,17 +129,22 @@ export default class datatable extends Component {
     }
 
     render() {
+
         return (
             <div>
+                <Timer start={Date.now()}></Timer>
                 <ReactTable
                     data={Array.from(this.state.data)}
                     columns={columns}
+                    filterable
+                    defaultFilterMethod={(filter, row) => matchSorter([row[filter.id]], filter.value).length !== 0}
                     defaultSorted={[{
                         id: 'history.custom.timeAgo.seconds',
                         desc: false
                     }
                 ]}
                     defaultPageSize={10}
+                    collapseOnDataChange={false}
                     className="-darker -highlight"
                     SubComponent={row => {
                     return (
@@ -112,6 +152,9 @@ export default class datatable extends Component {
                             style={{
                             padding: "10px"
                         }}>
+                            <em>
+                                {`MMR Distribution`}
+                            </em>
                             <ReactTable
                                 data={[row.original]}
                                 columns={subCompStats}
@@ -119,7 +162,7 @@ export default class datatable extends Component {
                                 showPagination={false}/>
                             <br/>
                             <em>
-                                Latest Match Details
+                                {`Latest Match Details | ${row.original.history.MatchId}`}
                             </em>
                             <div className='col-md-12'>
                                 <img

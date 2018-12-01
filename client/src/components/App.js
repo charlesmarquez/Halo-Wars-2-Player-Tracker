@@ -1,5 +1,4 @@
 import React, {Component} from "react";
-import DataTable from './datatable'
 import DataTable1 from './reactTable'
 import "../styles/App.css";
 import "react-table/react-table.css"

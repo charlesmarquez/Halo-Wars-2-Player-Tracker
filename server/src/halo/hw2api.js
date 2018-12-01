@@ -65,7 +65,7 @@ async function getJson(response) {
     return json;
 }
 
-async function getHistory(count = 1, player = 'aykonz sidekick') {
+async function getHistory(count = 2, player = 'aykonz sidekick') {
 
     var url = `https://www.haloapi.com/stats/hw2/players/${player}/matches?start=1&count=${count}`
     const response = await getRequest(url);
@@ -175,30 +175,29 @@ module.exports.getSeasonStats = getSeasonStats
  * Uses 3 requests per player. Has potential to query 6 players per request. OPTIMIZE.
  */
 
-async function getPlaylistStats(player = 'admiration') {
+async function getPlaylistStats(player = 'mike beaston') {
 
-    const playlistMap = config.playlists
+    var stats = {}
 
-    stats = {}
-
-    for (x of playlistMap) {
+    for (x of config.playlists) {
         const url = `https://www.haloapi.com/stats/hw2/playlist/${x.id}/rating?players=${player}`
         const response = await getRequest(url);
         const json = await getJson(response);
 
-        res = json.Results[0].Result
-        stats[x.name] = res
+        MMR = json.Results[0].Result
+        stats[x.name] = MMR
     }
     return stats
 }
 module.exports.getPlaylistStats = getPlaylistStats
 
-test = async () => {
-    x = await getPlaylistStats()
-    console.log(x)
-}
+test = async (player) => {
+        x = await getPlaylistStats(player)
+        return x
+    }
+module.exports.test = test
 
-test()
+// test('mike beaston')
 
 async function getLastGameID(player) {
     var url = `https://www.haloapi.com/stats/hw2/players/${player}/matches?start=1&count=1`
@@ -236,13 +235,12 @@ module.exports.getPlayer = getPlayer
 
 async function getLeaderboard(playlistId = '548d864e-8666-430e-9140-8dd2ad8fbfcd') {
     seasonId = '3527a6d6-29d6-485f-9be6-83a5881ce42c'
-    count = 3
+    count = 250
 
     req = await getRequest(`https://www.haloapi.com/stats/hw2/player-leaderboards/csr/${seasonId}/${playlistId}?count=${count}`)
     json = await getJson(req)
 
     results = json.Results
-
     return results
 }
 module.exports.getLeaderboard = getLeaderboard
@@ -250,7 +248,6 @@ module.exports.getLeaderboard = getLeaderboard
 async function parseMaps() {
     req = await getRequest(`https://www.haloapi.com/metadata/hw2/maps`)
     json = await getJson(req)
-
     return json
 }
 module.exports.parseMaps = parseMaps
@@ -267,9 +264,7 @@ function initKeys() {
         }
         keydict.push(x)
     });
-
     console.log(`KEYS INITIATED`);
-
     return keydict
 }
 
