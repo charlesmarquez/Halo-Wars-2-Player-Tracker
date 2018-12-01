@@ -106,7 +106,7 @@ export default class datatable extends Component {
         setInterval(() => {
             console.log('Refreshing ..')
             this.setData()
-        }, 60000);
+        }, 120000);
     }
 
     componentDidUpdate = (prevState) => {}

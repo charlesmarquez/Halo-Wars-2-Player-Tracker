@@ -13,7 +13,7 @@ keydict = initKeys()
 var limiter = new RateLimiter({
     rate: config.keys.length * 10,
     interval: 10,
-    backoffTime: 3,
+    backoffTime: 10,
 });
 
 console.log(`limiter initiated: ${limiter.rate} reqs per ${limiter.interval}s`);
