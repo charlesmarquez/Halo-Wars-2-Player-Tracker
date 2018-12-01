@@ -60,9 +60,12 @@ async function getValues() {
     var coll = db.collection(collection)
     var cursor = coll.find();
 
-    x = await cursor.toArray()
+    x = cursor.toArray().then((result) => {
+        conn.close();
+    }).catch((err) => {
+        console.error(err);
+    });
 
-    conn.close();
     return x
 }
 module.exports.getValues = getValues
@@ -81,10 +84,16 @@ async function updateValues(item) {
     getconn().then(async (conn) => {
         db = conn.db(dbname)
         var coll = db.collection(collection)
-        
+
         for (row of item) {
             uid = row._id
-            coll.updateOne({_id: uid}, {$set: row}, {upsert:true})      
+            coll.updateOne({
+                _id: uid
+            }, {
+                $set: row
+            }, {
+                upsert: true
+            })
         }
 
         console.log(`Database Updated.`);
