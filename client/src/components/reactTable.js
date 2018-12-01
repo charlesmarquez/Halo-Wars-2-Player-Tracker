@@ -113,7 +113,6 @@ export default class datatable extends Component {
 
     setData = async() => {
         this
-            .props
             .callApi()
             .then(res => {
                 this.setState({data: res})
@@ -123,6 +122,15 @@ export default class datatable extends Component {
     handleChange = (event) => {
         console.log(`something changed`)
     }
+
+    callApi = async() => {
+        const response = await fetch("/api/players");
+        const body = await response.json();
+        if (response.status !== 200) 
+            throw Error(body.message);
+        this.setState({data: body})
+        return body;
+    };
 
     render() {
 
