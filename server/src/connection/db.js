@@ -62,6 +62,7 @@ async function getValues() {
 
     x = cursor.toArray().then((result) => {
         conn.close();
+        return result
     }).catch((err) => {
         console.error(err);
     });
