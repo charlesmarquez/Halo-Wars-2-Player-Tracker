@@ -45,7 +45,7 @@ const columns = [
           <option value="3v3">3v3</option>
           <option value="N/A">Custom</option>
         </select>,
-        Cell: props => <div>{props.value === 'N/A' ? 'Custom' : `${props.value}, MMR: ${typeof props.row._original.mmr[props.value].Mmr.Rating == 'undefined' ? props.row._original.mmr[props.value].Mmr.Rating.toFixed(4) : 'Not Available'}`}</div>
+        Cell: props => <div>{props.value === 'N/A' ? 'Custom' : `${props.value}, MMR: ${props.row._original.history.RatingProgress.UpdatedMmr.Rating.toFixed(4)}`}</div>
     }
 ];
 
