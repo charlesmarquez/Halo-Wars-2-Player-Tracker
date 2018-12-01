@@ -51,11 +51,9 @@ app.post('/api/addplayer', (req, res) => {
       success = false
       res.send(err)  
   });
-
 });
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
-
 
 setInterval(() => {
   hw2.dumpLeaderboardHistory('548d864e-8666-430e-9140-8dd2ad8fbfcd')

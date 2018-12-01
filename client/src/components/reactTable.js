@@ -9,18 +9,14 @@ const columns = [
         Header: "Player",
         accessor: "Player.Gamertag",
     }, {
-        Header: "Last Online (s)",
+        Header: "Last Online",
         accessor: "history.custom.timeAgo.seconds",
-        id: 'timeago',
         filterMethod: (filter, row) => {
             if (filter.value === "all") {
               return true;
             }
-            if (filter.value === "true") {
-              return row[filter.id] > 3600;
-            }
-            return row[filter.id] < 86400;
-          },
+            return row._original.history.custom.timeAgo.seconds < filter.value;
+        },
           Filter: ({ filter, onChange }) =>
         <select
           onChange={event => onChange(event.target.value)}
