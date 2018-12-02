@@ -12,7 +12,7 @@ keydict = initKeys()
 
 var limiter = new RateLimiter({
     rate: config.keys.length * 10,
-    interval: 10,
+    interval: 20,
     backoffTime: 20,
     maxWaitingTime: 900
 });
