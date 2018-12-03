@@ -122,7 +122,6 @@ export default class HaloTable extends Component {
     callApi = async() => {
         const response = await fetch("/api/players");
         const body = await response.json();
-        console.log(body);
         if (response.status !== 200) 
             throw Error(body.message);
         this.setState({data: body})
