@@ -12,9 +12,9 @@ keydict = initKeys()
 
 var limiter = new RateLimiter({
     rate: config.keys.length * 10,
-    interval: 20,
-    backoffTime: 20,
-    maxWaitingTime: 900
+    interval: 10,
+    backoffTime: 3,
+    maxWaitingTime: 300
 });
 
 console.log(`limiter initiated: ${limiter.rate} reqs per ${limiter.interval}s`);
@@ -177,28 +177,19 @@ module.exports.getSeasonStats = getSeasonStats
  */
 
 async function getPlaylistStats(player = 'mike beaston') {
-
+    const playerName = player
     var stats = {}
 
-    for (x of config.playlists) {
-        const url = `https://www.haloapi.com/stats/hw2/playlist/${x.id}/rating?players=${player}`
-        const response = await getRequest(url);
-        const json = await getJson(response);
-
+    for (const playlist of config.playlists) {
+        const url = `https://www.haloapi.com/stats/hw2/playlist/${playlist.id}/rating?players=${playerName}`
+        const response = await getRequest(url)
+        const json = await getJson(response)
         MMR = json.Results[0].Result
-        stats[x.name] = MMR
+        stats[playlist.name] = MMR
     }
     return stats
 }
 module.exports.getPlaylistStats = getPlaylistStats
-
-test = async (player) => {
-        x = await getPlaylistStats(player)
-        return x
-    }
-module.exports.test = test
-
-// test('mike beaston')
 
 async function getLastGameID(player) {
     var url = `https://www.haloapi.com/stats/hw2/players/${player}/matches?start=1&count=1`
@@ -207,6 +198,16 @@ async function getLastGameID(player) {
     const json = await getJson(response);
     return (json.Results[0].MatchId);
 }
+
+async function getMatchEvents(matchId = 'a9e73a2a-7a61-4732-b637-1c4352ab7d3f') {
+    var url = `https://www.haloapi.com/stats/hw2/matches/${matchId}/events`
+    const response = await getRequest(url);
+    const json = await getJson(response);
+
+    return json.GameEvents
+}
+module.exports.getMatchEvents = getMatchEvents
+
 
 async function getPlayer(player = 'Mike BEASTon') {
 
@@ -234,9 +235,8 @@ async function getPlayer(player = 'Mike BEASTon') {
 }
 module.exports.getPlayer = getPlayer
 
-async function getLeaderboard(playlistId = '548d864e-8666-430e-9140-8dd2ad8fbfcd') {
+async function getLeaderboard(playlistId = '548d864e-8666-430e-9140-8dd2ad8fbfcd', count = 250) {
     seasonId = '3527a6d6-29d6-485f-9be6-83a5881ce42c'
-    count = 250
 
     req = await getRequest(`https://www.haloapi.com/stats/hw2/player-leaderboards/csr/${seasonId}/${playlistId}?count=${count}`)
     json = await getJson(req)

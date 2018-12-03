@@ -90,6 +90,7 @@ function time_ago(result) {
     diff = timeAgo.format(Date.now() - diffms)
     return {
         seconds: Math.floor(diffms / 1000),
+        ms: diffms,
         timeago: diff,
         duration: `${durMin}:${durSec}`
     }
@@ -122,9 +123,15 @@ async function getValidName(player) {
 }
 module.exports.getValidName = getValidName
 
+async function matchEvents() {
+    return halo.getMatchEvents()
+}
+module.exports.matchEvents = matchEvents
+
+
 async function dumpLeaderboardAll(playlist) {
 
-    halo.getLeaderboard(playlist).then(async (results) => {
+    halo.getLeaderboard(playlist, 3).then(async (results) => {
         for (const player of results) {
             delete player.Score
             delete player.Rank
@@ -150,13 +157,11 @@ async function dumpLeaderboardHistory(playlist) {
 
     console.log(`Starting Leaderboard dump for playlist ${playlist}`)
 
-    halo.getLeaderboard(playlist).then(async (results) => {
+    halo.getLeaderboard(playlist, 3).then(async (results) => {
         for (const player of results) {
             delete player.Score
             delete player.Rank
             player.history = await getHistoryData(player.Player.Gamertag) // Returns Match History response + custom attrs
-            // player.season = await halo.getSeasonStats(player.Player.Gamertag)
-            // player.mmr = await halo.getPlaylistStats(player.Player.Gamertag)
             player.updated = Date.now()
             player._id = player.Player.Gamertag
         }
@@ -169,6 +174,8 @@ async function dumpLeaderboardHistory(playlist) {
 }
 module.exports.dumpLeaderboardHistory = dumpLeaderboardHistory
 
-// dumpLeaderboardAll('548d864e-8666-430e-9140-8dd2ad8fbfcd')
-// dumpLeaderboardAll('379f9ee5-92ec-45d9-b5e5-9f30236cab00')
-// dumpLeaderboardAll('4a2cedcc-9098-4728-886f-60649896278d')
+// setTimeout(async() => {
+//     await dumpLeaderboardAll('548d864e-8666-430e-9140-8dd2ad8fbfcd')
+//     await dumpLeaderboardAll('379f9ee5-92ec-45d9-b5e5-9f30236cab00')
+//     await dumpLeaderboardAll('4a2cedcc-9098-4728-886f-60649896278d')
+// }, 1000);

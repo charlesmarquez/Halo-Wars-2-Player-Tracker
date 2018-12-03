@@ -57,18 +57,15 @@ async function getValues() {
     conn = await getconn()
     db = conn.db(dbname)
 
-    var coll = db.collection(collection)
-    var cursor = coll.find();
-
-    x = cursor.toArray().then((result) => {
-        conn.close();
-        return result
-    }).catch((err) => {
-        console.error(err);
-    });
-
-    return x
+    var coll = await db.collection(collection)
+    var cursor = await coll.find();
+    console.time('cursor.toArray')
+    var results = await cursor.toArray();
+    console.timeEnd('cursor.toArray')
+    conn.close()
+    return results
 }
+
 module.exports.getValues = getValues
 
 /**

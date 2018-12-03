@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import ReactTable from 'react-table'
 import Timer from './timer'
+import MatchEvents from './MatchEvents.js'
 import "react-table/react-table.css";
 import matchSorter from 'match-sorter'
 
@@ -67,6 +68,7 @@ const subCompMatch = [
                     : 'LOSS'}</div>
     }
 ];
+
 const subCompStats = [
     {
         Header: "1v1",
@@ -92,24 +94,22 @@ const subCompStats = [
     }
 ]
 
-export default class datatable extends Component {
+export default class HaloTable extends Component {
     constructor() {
         super()
         this.state = {
             data: {}
         }
     }
-
+    
     componentDidMount = () => {
         this.setData()
-
         setInterval(() => {
-            console.log('Refreshing ..')
-            this.setData()
-        }, 120000);
+                console.time('this.setData');
+                this.setData()
+                console.timeEnd('this.setData');
+            }, 60000);
     }
-
-    componentDidUpdate = (prevState) => {}
 
     setData = async() => {
         this
@@ -119,14 +119,10 @@ export default class datatable extends Component {
             })
     }
 
-    handleChange = (event) => {
-        console.log(`something changed`)
-    }
-
     callApi = async() => {
         const response = await fetch("/api/players");
-        console.log(response)
         const body = await response.json();
+        console.log(body);
         if (response.status !== 200) 
             throw Error(body.message);
         this.setState({data: body})
@@ -166,9 +162,7 @@ export default class datatable extends Component {
                                 defaultPageSize={1}
                                 showPagination={false}/>
                             <br/>
-                            <em>
-                                {`Latest Match Details | ${row.original.history.MatchId}`}
-                            </em>
+                                <a style={{cursor: 'pointer'}} href={`https://www.halowaypoint.com/en-us/games/halo-wars-2/matches/${row.original.history.MatchId}/players/${row.original.Player.Gamertag}?gameHistoryMatchIndex=0&gameHistoryGameModeFilter=All`} target="_blank" rel='noopener noreferrer'>Latest Match Details</a>
                             <div className='col-md-12'>
                                 <img
                                     className='rounded float-left'
@@ -184,12 +178,7 @@ export default class datatable extends Component {
                                 showPagination={false}
                                 SubComponent={row => {
                                 return (
-                                    <div
-                                        style={{
-                                        padding: "20px"
-                                    }}>
-                                        Match Builds in the future maybe
-                                    </div>
+                                    <MatchEvents row={row}></MatchEvents>
                                 );
                             }}/>
                         </div>
