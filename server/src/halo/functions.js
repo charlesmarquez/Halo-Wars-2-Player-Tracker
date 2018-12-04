@@ -129,15 +129,29 @@ async function matchEvents() {
 module.exports.matchEvents = matchEvents
 
 
+/**
+ * @function {dumpLeaderboardAll}
+ * 
+ * @description
+ * Large database dump.
+ * - Update MMR
+ * - Update Time Last Played
+ * 
+ * Heavy Load
+ * - 5 API requests per player (approx 500~ Players) | 2500 requests
+ * 
+ * @returns {void}
+ */
+
 async function dumpLeaderboardAll(playlist) {
 
     halo.getLeaderboard(playlist, 250).then(async (results) => {
         for (const player of results) {
             delete player.Score
             delete player.Rank
-            player.history = await getHistoryData(player.Player.Gamertag) // Returns Match History response + custom attrs
-            player.season = await halo.getSeasonStats(player.Player.Gamertag)
-            player.mmr = await halo.getPlaylistStats(player.Player.Gamertag)
+            player.history = await getHistoryData(player.Player.Gamertag) // 1 api call: Returns Match History response + custom attrs
+            player.season = await halo.getSeasonStats(player.Player.Gamertag) // 1 api call: returns Season stats endpoint
+            player.mmr = await halo.getPlaylistStats(player.Player.Gamertag) // 3 api calls: returns MMR for 1,2,3 ranked playlists
             player.updated = Date.now()
             player._id = player.Player.Gamertag
             console.log(player._id)
@@ -157,11 +171,11 @@ async function dumpLeaderboardHistory(playlist) {
 
     console.log(`Starting Leaderboard dump for playlist ${playlist}`)
 
-    halo.getLeaderboard(playlist, 3).then(async (results) => {
+    halo.getLeaderboard(playlist, 250).then(async (results) => {
         for (const player of results) {
             delete player.Score
             delete player.Rank
-            player.history = await getHistoryData(player.Player.Gamertag) // Returns Match History response + custom attrs
+            player.history = await getHistoryData(player.Player.Gamertag) // (1 API calls) Returns Match History response + custom attrs
             player.updated = Date.now()
             player._id = player.Player.Gamertag
         }
@@ -175,7 +189,7 @@ async function dumpLeaderboardHistory(playlist) {
 module.exports.dumpLeaderboardHistory = dumpLeaderboardHistory
 
 // setTimeout(async() => {
-//     await dumpLeaderboardAll('548d864e-8666-430e-9140-8dd2ad8fbfcd')
-//     await dumpLeaderboardAll('379f9ee5-92ec-45d9-b5e5-9f30236cab00')
-//     await dumpLeaderboardAll('4a2cedcc-9098-4728-886f-60649896278d')
+//     dumpLeaderboardAll('548d864e-8666-430e-9140-8dd2ad8fbfcd')
+//     dumpLeaderboardAll('379f9ee5-92ec-45d9-b5e5-9f30236cab00')
+//     dumpLeaderboardAll('4a2cedcc-9098-4728-886f-60649896278d')
 // }, 1000);

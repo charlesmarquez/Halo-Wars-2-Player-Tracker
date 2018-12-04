@@ -1,6 +1,7 @@
 const config = require('../config');
 const RateLimiter = require('request-rate-limiter');
 const mongo = require('../connection/db');
+const {KeyQueue} = require('./KeyQueue');
 
 Array.prototype.hasmin = function (attrib) {
     return this.reduce(function (prev, curr) {
@@ -10,8 +11,11 @@ Array.prototype.hasmin = function (attrib) {
 
 keydict = initKeys()
 
+keys = new KeyQueue()
+keys.addKeys(config.keys)
+
 var limiter = new RateLimiter({
-    rate: config.keys.length * 10,
+    rate: (config.keys.length * 10) + (config.production.length * 190),
     interval: 10,
     backoffTime: 3,
     maxWaitingTime: 300
@@ -36,7 +40,7 @@ async function getRequest(url) {
         dataType: 'json',
         headers: {
             'Accept-Language': 'en',
-            'Ocp-Apim-Subscription-Key': await getKey(keydict)
+            'Ocp-Apim-Subscription-Key': keys.getKey()
         }
     }
 
@@ -162,8 +166,6 @@ async function getSeasonStats(player = 'mike beaston', seasonId = '3527a6d6-29d6
 }
 module.exports.getSeasonStats = getSeasonStats
 
-// getSeasonStats()
-
 /**
  * @function {getPlaylistStats}
  * 
@@ -207,7 +209,6 @@ async function getMatchEvents(matchId = 'a9e73a2a-7a61-4732-b637-1c4352ab7d3f') 
     return json.GameEvents
 }
 module.exports.getMatchEvents = getMatchEvents
-
 
 async function getPlayer(player = 'Mike BEASTon') {
 
@@ -267,56 +268,4 @@ function initKeys() {
     });
     console.log(`KEYS INITIATED`);
     return keydict
-}
-
-async function getKey(keydict) {
-    var key = Array.from(keydict).hasmin('called')
-
-    if (key.status) {
-        if (key.called < 10) {
-            key.called++
-            result = String(key.key)
-            // console.log(`key: ${key.key} | called: ${key.called} | status: ${key.status}`);
-        } else {
-            key.status = false
-            // console.log(`${key.key} switched to ${key.status}`);
-            resetKeys(keydict)
-        }
-    }
-    return result
-}
-
-function checkKeys(keydict) {
-    states = []
-    for (const key of keydict) {
-        states.push(key.status)
-    }
-
-    x = false
-    for (const state of states) {
-        x = x || state
-    }
-
-    if (!x) {
-        resetKeys(keydict)
-    }
-}
-
-function resetKeys(keydict) {
-    for (const key of keydict) {
-        key.called = 0
-        key.status = true
-    }
-
-    console.log(`Rate Reset`);
-    return keydict
-}
-
-function testkeys() {
-    keydict = initKeys()
-
-    for (let i = 0; i < 70; i++) {
-        apikey = getKey(keydict)
-        // console.log(`using: ${apikey}`);
-    }
 }
