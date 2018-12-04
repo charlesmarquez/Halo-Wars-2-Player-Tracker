@@ -67,9 +67,12 @@ setTimeout(async () => {
   currentData = await db.getValues()
 }, 50);
 
-setInterval(async () => {
+setInterval(() => {
   hw2.dumpLeaderboardHistory('548d864e-8666-430e-9140-8dd2ad8fbfcd')
   hw2.dumpLeaderboardHistory('379f9ee5-92ec-45d9-b5e5-9f30236cab00')
   hw2.dumpLeaderboardHistory('4a2cedcc-9098-4728-886f-60649896278d')
-  currentData = await db.getValues()
 }, 300000);
+
+setInterval(async () => {
+  currentData = await db.getValues()
+}, 120000);
