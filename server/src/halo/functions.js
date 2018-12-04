@@ -131,7 +131,7 @@ module.exports.matchEvents = matchEvents
 
 async function dumpLeaderboardAll(playlist) {
 
-    halo.getLeaderboard(playlist, 3).then(async (results) => {
+    halo.getLeaderboard(playlist, 250).then(async (results) => {
         for (const player of results) {
             delete player.Score
             delete player.Rank

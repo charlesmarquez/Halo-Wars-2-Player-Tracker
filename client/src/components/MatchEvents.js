@@ -32,7 +32,7 @@ export default class MatchEvents extends Component {
             body: JSON.stringify({post: this.props})
         })
         const body = await response.json();
-        console.log(body);
+        // console.log(body);
         if (response.status !== 200) 
             throw Error(body.message);
         this.setState({data: body})
@@ -43,7 +43,7 @@ export default class MatchEvents extends Component {
         return (
             <div>
                 Match Events
-                {console.log(this.props)}
+                {/* {console.log(this.props)} */}
             </div>
         )
     }
