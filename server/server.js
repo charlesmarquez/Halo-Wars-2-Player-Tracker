@@ -71,7 +71,7 @@ setInterval(() => {
   hw2.dumpLeaderboardHistory('548d864e-8666-430e-9140-8dd2ad8fbfcd')
   hw2.dumpLeaderboardHistory('379f9ee5-92ec-45d9-b5e5-9f30236cab00')
   hw2.dumpLeaderboardHistory('4a2cedcc-9098-4728-886f-60649896278d')
-}, 300000);
+}, 180000);
 
 setInterval(async () => {
   currentData = await db.getValues()
