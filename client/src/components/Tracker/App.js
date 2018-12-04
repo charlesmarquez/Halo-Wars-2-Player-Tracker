@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import HaloTable from './reactTable'
-import "../styles/App.css";
+import "../../styles/App.css";
 import "react-table/react-table.css"
 
 class App extends Component {

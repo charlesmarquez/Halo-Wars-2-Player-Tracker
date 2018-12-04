@@ -7,6 +7,7 @@
     "react": "^16.6.3",
     "react-animate-on-change": "^2.1.1",
     "react-dom": "^16.6.3",
+    "react-router-dom": "^4.4.0-beta.6",
     "react-scripts": "2.1.1",
     "react-table": "^6.8.6",
     "uuid": "^3.3.2"
