@@ -134,13 +134,29 @@ iframe {
   background: #fff;
 }
 
-.row.example .cell{
-  -webkit-animation-name: example;
+
+.row.fadeinRow{
+  -webkit-animation-name: fadeinRow;
   -webkit-animation-duration: 0.8s;
 }
 
-@-webkit-keyframes example {
-  0% {background-color: rgb(71, 177, 238)}
+.row.online{
+  background-color: rgb(172, 217, 243)
+}
+
+.row.online.row.fadeinRow{
+  -webkit-animation-name: fadeinRow2;
+  -webkit-animation-duration: 0.8s;
+}
+
+@-webkit-keyframes fadeinRow2 {
+  0% {background-color: #ffffff} 
+  35% {background-color: rgb(172, 217, 243)}
+} 
+
+@-webkit-keyframes fadeinRow {
+  0% {background-color: #ffffff} 
+  35% {background-color: rgb(172, 217, 243)}
   100% {background-color: #ffffff} 
 } 
 

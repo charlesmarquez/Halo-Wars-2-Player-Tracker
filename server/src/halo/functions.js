@@ -3,7 +3,9 @@ const TimeAgo = require('javascript-time-ago');
 const en = require('javascript-time-ago/locale/en');
 const halo = require('./hw2api');
 const db = require('../connection/db');
+const config = require('../config');
 
+var mapsPromise = halo.parseMaps()
 
 function formatDuration(duration) {
     patternh = /(\d+)H(\d+)M(\d+)./g;
@@ -37,8 +39,42 @@ function formatDuration(duration) {
     return duration_time.total * 1000
 }
 
+async function getHistoryData(playerName = 'Mike BEASTon') {
+    const history = await halo.getHistory(1, playerName)
+
+    history.custom.timeAgo = time_ago(history)
+    history.custom.matchPlaylist = getPlaylist(history)
+    history.custom.mapMetadata = await getMapMeta(history)
+
+    // console.log(history);
+
+    return history
+}
+
+async function getMapMeta(element) {
+    mapData = await mapsPromise
+    mapMetadata = mapData.ContentItems.find(item => {
+        return (item.View.HW2Map.ID == element.MapId)
+    })
+    return mapMetadata
+}
+
+function getPlaylist(result) {
+    var id = result.PlaylistId
+
+    if (result.custom.matchType == 'Matchmaking') {
+        for (x of config.playlists) {
+            if (x.id == id) {
+                return x.name
+            }
+        }
+    }
+
+    return "N/A"
+}
+
 function time_ago(result) {
-    timeStart = new Date(result.matchStartISO) //
+    timeStart = new Date(result.MatchStartDate.ISO8601Date) //
     timenow = Date.now()
     duration = result.PlayerMatchDuration
     duration = formatDuration(duration)
@@ -47,50 +83,113 @@ function time_ago(result) {
     timeAgo = new TimeAgo('en-US')
     diffms = timenow - timeStart - duration
 
+    durMin = Math.floor(duration / 1000 / 60)
+    durSec = Math.floor((duration - durMin * 1000 * 60) / 1000)
+
+
     diff = timeAgo.format(Date.now() - diffms)
     return {
-        seconds: Math.floor(diffms/1000),
+        seconds: Math.floor(diffms / 1000),
+        ms: diffms,
         timeago: diff,
-        matchType: matchType
+        duration: `${durMin}:${durSec}`
     }
 }
 
 /**
- * @function (getTimeDiff|String)
+ * @function (lastplayed)
  * 
- * @param playerName
- * Gamertag to be tracked.
- * 
- * @description (1 API Request) 
- * Provides time since last game completed on match history.
- * 
- * @returns (String) Time-ago of last game.
+ * @returns {dict} of results from MongoDB Atlas data binded with HW2 API Results
  */
 
-async function getTimeDiff(playerName = 'Mike BEASTon') {
-    history = await halo.getHistory(1, playerName)
-    for (res of history) {
-        timeDiff = time_ago(res)
-        return timeDiff
-    }
-}
-
 async function lastplayed() {
-    halodb = await db.getValues()
+    var halodb = await db.getValues()
 
-    var results = []
-
-    for (res of halodb) {
-        player = res.gamertag
+    for (row of halodb) {
+        player = row.Player.Gamertag
         timeAGO = await getTimeDiff(player)
-        dict = {
-            player: player,
-            time: timeAGO
-        }
-        results.push(dict)
+        row.player = player
+        row.time = timeAGO
+
+        console.log(row)
     }
-
-    return results
-
+    return halodb
 }
+
 module.exports.lastplayed = lastplayed
+
+async function getValidName(player) {
+    return halo.getPlayer(player)
+}
+module.exports.getValidName = getValidName
+
+async function matchEvents() {
+    return halo.getMatchEvents()
+}
+module.exports.matchEvents = matchEvents
+
+
+/**
+ * @function {dumpLeaderboardAll}
+ * 
+ * @description
+ * Large database dump.
+ * - Update MMR
+ * - Update Time Last Played
+ * 
+ * Heavy Load
+ * - 5 API requests per player (approx 500~ Players) | 2500 requests
+ * 
+ * @returns {void}
+ */
+
+async function dumpLeaderboardAll(playlist) {
+
+    halo.getLeaderboard(playlist, 250).then(async (results) => {
+        for (const player of results) {
+            delete player.Score
+            delete player.Rank
+            player.history = await getHistoryData(player.Player.Gamertag) // 1 api call: Returns Match History response + custom attrs
+            player.season = await halo.getSeasonStats(player.Player.Gamertag) // 1 api call: returns Season stats endpoint
+            player.mmr = await halo.getPlaylistStats(player.Player.Gamertag) // 3 api calls: returns MMR for 1,2,3 ranked playlists
+            player.updated = Date.now()
+            player._id = player.Player.Gamertag
+            console.log(player._id)
+        }
+        db.updateValues(results, res => {
+        console.log(`Data successfully dumped`)
+        })
+    }).catch(err => {
+        console.error(err)
+    })
+}
+
+module.exports.dumpLeaderboardAll = dumpLeaderboardAll
+
+
+async function dumpLeaderboardHistory(playlist) {
+
+    console.log(`Starting Leaderboard dump for playlist ${playlist}`)
+
+    halo.getLeaderboard(playlist, 250).then(async (results) => {
+        for (const player of results) {
+            delete player.Score
+            delete player.Rank
+            player.history = await getHistoryData(player.Player.Gamertag) // (1 API calls) Returns Match History response + custom attrs
+            player.updated = Date.now()
+            player._id = player.Player.Gamertag
+        }
+        db.updateValues(results, res => {
+        console.log(`Data successfully dumped`)
+        })
+    }).catch(err => {
+        console.error(err)
+    })
+}
+module.exports.dumpLeaderboardHistory = dumpLeaderboardHistory
+
+// setTimeout(async() => {
+//     dumpLeaderboardAll('548d864e-8666-430e-9140-8dd2ad8fbfcd')
+//     dumpLeaderboardAll('379f9ee5-92ec-45d9-b5e5-9f30236cab00')
+//     dumpLeaderboardAll('4a2cedcc-9098-4728-886f-60649896278d')
+// }, 1000);

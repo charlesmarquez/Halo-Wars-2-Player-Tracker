@@ -1,21 +1,10 @@
-Array.prototype.hasMin = function (attrib) {
-    return this.reduce(function (prev, curr) {
-        return prev[attrib] < curr[attrib] ? prev : curr;
-    });
-}
+// x = [...'1e4a82e2-f5fd-409a-905d-6c125a8ef0e9']
+//     .map(char => char.charCodeAt(0))
+//     .reduce((curr, prev) => prev + curr)
 
-x = [{
-        a: 1,
-        b: 2,
-        c: 13
-    },
-    {
-        a: 11,
-        b: 12,
-        c: 13
-    }
-]
-q = x.reduce((prev, curr) => {
-    console.log(prev)
-    console.log(curr)
-})
+// console.log(x);
+// console.log('17934696');
+
+x = [...'1e4a82e2-f5fd-409a-905d-6c125a8ef0e9']
+    .map(char => console.log(char.charCodeAt(0)))
+
