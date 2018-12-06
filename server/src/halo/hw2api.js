@@ -216,12 +216,7 @@ async function getPlayer(player = 'Mike BEASTon') {
     var playerName = player
 
     var matchId = await getLastGameID(player);
-
-    var url = `https://www.haloapi.com/stats/hw2/matches/${matchId}/events`
-    const response = await getRequest(url);
-    const json = await getJson(response);
-
-    events = json.GameEvents
+    var events = await getMatchEvents(matchId)
 
     for (const event of events) {
         if (event.EventName == 'PlayerJoinedMatch') {

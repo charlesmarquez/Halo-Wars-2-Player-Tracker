@@ -6,8 +6,6 @@ const url = config.url
 const options = {
     useNewUrlParser: true
 }
-const dbname = config.dbname
-const collection = config.collection
 
 /**
  * @function insertValue
@@ -19,49 +17,18 @@ const collection = config.collection
  * @param {*} collection  | collection within database
  */
 
-async function insertValue(item) {
-
-    conn = await getconn()
-    db = conn.db(dbname)
-
-    var coll = db.collection(collection)
-    coll.insertOne(item, (err, res) => {
-        if (err !== null) {
-            console.error(`Already exists in database. _id found. | ${item.gamertag}`);
-            return false
-        } else {
-            console.log(`Inserted: ${item.gamertag}`);
-            return true
-        }
-    })
-    conn.close();
-}
-module.exports.insertValue = insertValue
-
-async function insertValues(item) {
-
-    conn = await getconn()
-    db = conn.db(dbname)
-
-    var coll = db.collection(collection)
-    coll.insertMany(item, (err, res) => {
-        if (err !== null) {
-            console.error(err)
-        }
-    })
-    conn.close();
-}
-module.exports.insertValues = insertValues
-
-async function getValues() {
+async function getValues({
+    dbname,
+    collection
+} = {}) {
     conn = await getconn()
     db = conn.db(dbname)
 
     var coll = await db.collection(collection)
     var cursor = await coll.find();
-    console.time('cursor.toArray')
+    // console.time('cursor.toArray')
     var results = await cursor.toArray();
-    console.timeEnd('cursor.toArray')
+    // console.timeEnd('cursor.toArray')
     conn.close()
     return results
 }
@@ -77,13 +44,17 @@ module.exports.getValues = getValues
  * Updates halo.playercsr collection in MongoDB Atlas
  */
 
-async function updateValues(item) {
+async function updateValues({
+    item,
+    dbname = config.dbname,
+    collection = config.collection,
+} = {}) {
 
     getconn().then(async (conn) => {
         db = conn.db(dbname)
         var coll = db.collection(collection)
 
-        for (row of item) {
+        for (const row of item) {
             uid = row._id
             coll.updateOne({
                 _id: uid
@@ -94,11 +65,12 @@ async function updateValues(item) {
             })
         }
 
-        console.log(`Database Updated.`);
-
+        console.log(`Database updated for ${item.length} rows.`);
         conn.close()
+        return true
     }).catch((err) => {
-        console.error(err);
+        console.error(`{updateValues}`, err);
+        return false
     });
 }
 module.exports.updateValues = updateValues
@@ -107,3 +79,26 @@ function getconn() {
     var conn = mongo.connect(url, options)
     return conn
 }
+
+async function getCollection({
+    dbname = config.dbname,
+    collection = config.collection,
+} = {}) {
+    conn = await getconn()
+    db = await conn.db(dbname)
+    coll = await db.collection(collection)
+
+
+    setTimeout(() => {
+        conn.close()
+    }, 60000);
+    // Timeout after one minute until better method is found.
+    // Unclosed connection
+
+    return {
+        conn,
+        db,
+        coll
+    }
+}
+module.exports.getCollection = getCollection

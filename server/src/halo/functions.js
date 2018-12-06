@@ -145,7 +145,7 @@ module.exports.matchEvents = matchEvents
 
 async function dumpLeaderboardAll(playlist) {
 
-    halo.getLeaderboard(playlist, 250).then(async (results) => {
+    halo.getLeaderboard(playlist, 2).then(async (results) => {
         for (const player of results) {
             delete player.Score
             delete player.Rank
@@ -156,8 +156,12 @@ async function dumpLeaderboardAll(playlist) {
             player._id = player.Player.Gamertag
             console.log(player._id)
         }
-        db.updateValues(results, res => {
-        console.log(`Data successfully dumped`)
+        db.updateValues({
+            item: results,
+            dbname: 'test',
+            collection: 'playercsr'
+        }, res => {
+            console.log(`Data successfully dumped`)
         })
     }).catch(err => {
         console.error(err)
@@ -179,8 +183,12 @@ async function dumpLeaderboardHistory(playlist) {
             player.updated = Date.now()
             player._id = player.Player.Gamertag
         }
-        db.updateValues(results, res => {
-        console.log(`Data successfully dumped`)
+        db.updateValues({
+            item: results,
+            dbname: 'test',
+            collection: 'playercsr'
+        }, res => {
+            console.log(`Data successfully dumped`)
         })
     }).catch(err => {
         console.error(err)
@@ -188,8 +196,6 @@ async function dumpLeaderboardHistory(playlist) {
 }
 module.exports.dumpLeaderboardHistory = dumpLeaderboardHistory
 
-// setTimeout(async() => {
-//     dumpLeaderboardAll('548d864e-8666-430e-9140-8dd2ad8fbfcd')
-//     dumpLeaderboardAll('379f9ee5-92ec-45d9-b5e5-9f30236cab00')
-//     dumpLeaderboardAll('4a2cedcc-9098-4728-886f-60649896278d')
-// }, 1000);
+dumpLeaderboardAll('548d864e-8666-430e-9140-8dd2ad8fbfcd')
+dumpLeaderboardAll('379f9ee5-92ec-45d9-b5e5-9f30236cab00')
+dumpLeaderboardAll('4a2cedcc-9098-4728-886f-60649896278d')
