@@ -42,9 +42,14 @@ function formatDuration(duration) {
 async function getHistoryData(playerName = 'Mike BEASTon') {
     const history = await halo.getHistory(1, playerName)
 
-    history.custom.timeAgo = time_ago(history)
-    history.custom.matchPlaylist = getPlaylist(history)
-    history.custom.mapMetadata = await getMapMeta(history)
+    try {
+        history.custom.timeAgo = time_ago(history)
+        history.custom.matchPlaylist = getPlaylist(history)
+        history.custom.mapMetadata = await getMapMeta(history)
+    } catch (error) {
+        console.log(history);
+        console.error(`${playerName}\n`, error);
+    }
 
     // console.log(history);
 
@@ -145,7 +150,7 @@ module.exports.matchEvents = matchEvents
 
 async function dumpLeaderboardAll(playlist) {
 
-    halo.getLeaderboard(playlist, 2).then(async (results) => {
+    halo.getLeaderboard(playlist, 250).then(async (results) => {
         for (const player of results) {
             delete player.Score
             delete player.Rank
@@ -196,6 +201,6 @@ async function dumpLeaderboardHistory(playlist) {
 }
 module.exports.dumpLeaderboardHistory = dumpLeaderboardHistory
 
-dumpLeaderboardAll('548d864e-8666-430e-9140-8dd2ad8fbfcd')
-dumpLeaderboardAll('379f9ee5-92ec-45d9-b5e5-9f30236cab00')
-dumpLeaderboardAll('4a2cedcc-9098-4728-886f-60649896278d')
+// dumpLeaderboardAll('548d864e-8666-430e-9140-8dd2ad8fbfcd')
+// dumpLeaderboardAll('379f9ee5-92ec-45d9-b5e5-9f30236cab00')
+// dumpLeaderboardAll('4a2cedcc-9098-4728-886f-60649896278d')

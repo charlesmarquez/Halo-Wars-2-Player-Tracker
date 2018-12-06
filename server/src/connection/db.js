@@ -18,8 +18,8 @@ const options = {
  */
 
 async function getValues({
-    dbname,
-    collection
+    dbname = config.dbname,
+    collection = config.collection
 } = {}) {
     conn = await getconn()
     db = conn.db(dbname)
