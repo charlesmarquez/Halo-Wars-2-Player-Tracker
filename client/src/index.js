@@ -3,8 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import * as serviceWorker from './serviceWorker';
 import App from './components/Tracker/App';
-import ReactTable from "./components/Tracker/reactTable";
-import {BrowserRouter, Link, Route} from "react-router-dom";
+import {BrowserRouter, Route} from "react-router-dom";
 
 ReactDOM.render(
     <BrowserRouter>

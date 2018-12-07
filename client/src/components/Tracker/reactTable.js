@@ -161,7 +161,7 @@ export default class HaloTable extends Component {
                                 defaultPageSize={1}
                                 showPagination={false}/>
                             <br/>
-                                <a style={{cursor: 'pointer'}} href={`https://www.halowaypoint.com/en-us/games/halo-wars-2/matches/${row.original.history.MatchId}/players/${row.original.Player.Gamertag}?gameHistoryMatchIndex=0&gameHistoryGameModeFilter=All`} target="_blank" rel='noopener noreferrer'>Latest Match Details</a>
+                                <a style={{cursor: 'pointer'}} href={`https://www.halowaypoint.com/en-us/games/halo-wars-2/game-history/players/${row.original.Player.Gamertag}?gameModeFilter=All&start=0&count=10`} target="_blank" rel='noopener noreferrer'>Latest Match Details</a>
                             <div className='col-md-12'>
                                 <img
                                     className='rounded float-left'

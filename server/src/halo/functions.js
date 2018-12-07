@@ -1,6 +1,6 @@
-const moment = require('moment');
 const TimeAgo = require('javascript-time-ago');
 const en = require('javascript-time-ago/locale/en');
+// const {canonical} = require('javascript-time-ago/source/gradation');
 const halo = require('./hw2api');
 const db = require('../connection/db');
 const config = require('../config');
@@ -92,7 +92,7 @@ function time_ago(result) {
     durSec = Math.floor((duration - durMin * 1000 * 60) / 1000)
 
 
-    diff = timeAgo.format(Date.now() - diffms)
+    diff = timeAgo.format(Date.now() - diffms, 'canonical')
     return {
         seconds: Math.floor(diffms / 1000),
         ms: diffms,
@@ -150,6 +150,8 @@ module.exports.matchEvents = matchEvents
 
 async function dumpLeaderboardAll(playlist) {
 
+    console.log(`Dump started for ${playlist}`);
+
     halo.getLeaderboard(playlist, 250).then(async (results) => {
         for (const player of results) {
             delete player.Score
@@ -159,11 +161,10 @@ async function dumpLeaderboardAll(playlist) {
             player.mmr = await halo.getPlaylistStats(player.Player.Gamertag) // 3 api calls: returns MMR for 1,2,3 ranked playlists
             player.updated = Date.now()
             player._id = player.Player.Gamertag
-            console.log(player._id)
         }
         db.updateValues({
             item: results,
-            dbname: 'test',
+            dbname: 'halo',
             collection: 'playercsr'
         }, res => {
             console.log(`Data successfully dumped`)
@@ -177,20 +178,20 @@ module.exports.dumpLeaderboardAll = dumpLeaderboardAll
 
 
 async function dumpLeaderboardHistory(playlist) {
-
-    console.log(`Starting Leaderboard dump for playlist ${playlist}`)
+    
+    console.log(`Dump started for ${playlist}`);
 
     halo.getLeaderboard(playlist, 250).then(async (results) => {
         for (const player of results) {
             delete player.Score
             delete player.Rank
-            player.history = await getHistoryData(player.Player.Gamertag) // (1 API calls) Returns Match History response + custom attrs
+            player.history = await getHistoryData(player.Player.Gamertag) // 1 api call: Returns Match History response + custom attrs
             player.updated = Date.now()
             player._id = player.Player.Gamertag
         }
         db.updateValues({
             item: results,
-            dbname: 'test',
+            dbname: 'halo',
             collection: 'playercsr'
         }, res => {
             console.log(`Data successfully dumped`)
@@ -201,6 +202,6 @@ async function dumpLeaderboardHistory(playlist) {
 }
 module.exports.dumpLeaderboardHistory = dumpLeaderboardHistory
 
-// dumpLeaderboardAll('548d864e-8666-430e-9140-8dd2ad8fbfcd')
-// dumpLeaderboardAll('379f9ee5-92ec-45d9-b5e5-9f30236cab00')
-// dumpLeaderboardAll('4a2cedcc-9098-4728-886f-60649896278d')
+// dumpLeaderboardHistory('548d864e-8666-430e-9140-8dd2ad8fbfcd')
+// dumpLeaderboardHistory('379f9ee5-92ec-45d9-b5e5-9f30236cab00')
+// dumpLeaderboardHistory('4a2cedcc-9098-4728-886f-60649896278d')

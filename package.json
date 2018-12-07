@@ -2,7 +2,7 @@
   "name": "example-create-react-app-express",
   "version": "1.0.0",
   "scripts": {
-    "client": "set PORT=8080 && cd client && yarn start",
+    "client": "set PORT=3000 && cd client && yarn start",
     "server": "nodemon server/server.js",
     "dev": "concurrently --kill-others-on-fail \"npm run server\" \"npm run client\""
   },
