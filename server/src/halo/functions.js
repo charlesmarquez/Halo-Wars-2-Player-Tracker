@@ -231,6 +231,6 @@ async function updatePlayers() {
     var data = fs.readFileSync(path.join(__dirname, 'players.json'));
     var json = JSON.parse(data);
     json.push(...arr);
-    fs.writeFileSync("players.json", JSON.stringify(arr))
+    fs.writeFileSync(path.join(__dirname, 'players.json'), JSON.stringify(arr))
 }
 module.exports.updatePlayers = updatePlayers
