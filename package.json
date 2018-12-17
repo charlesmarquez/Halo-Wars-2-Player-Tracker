@@ -1,6 +1,11 @@
 {
   "name": "example-create-react-app-express",
   "version": "1.0.0",
+  "nodemonConfig": {
+    "ignore": [
+      "players.json"
+    ]
+  },
   "scripts": {
     "client": "set PORT=3000 && cd client && yarn start",
     "server": "nodemon server/server.js",
@@ -11,6 +16,7 @@
     "express": "^4.16.4",
     "google-closure-library": "^20180910.0.0",
     "match-sorter": "^2.3.0",
+    "moment": "^2.23.0",
     "nodemon": "^1.18.7",
     "yarn": "^1.12.3"
   },

@@ -231,8 +231,14 @@ async function getPlayer(player = 'Mike BEASTon') {
 }
 module.exports.getPlayer = getPlayer
 
-async function getLeaderboard(playlistId = '548d864e-8666-430e-9140-8dd2ad8fbfcd', count = 250) {
-    seasonId = '3527a6d6-29d6-485f-9be6-83a5881ce42c'
+async function getLeaderboard({
+    playlistId = `548d864e-8666-430e-9140-8dd2ad8fbfcd`,
+    count = 250,
+} = {}) {
+    // seasonId = '3527a6d6-29d6-485f-9be6-83a5881ce42c'
+    // seasonId = '3cda4240-6d72-4b09-99cd-f1f2c89eb0ee'
+    seasonId = '768ff143-675d-49e2-9955-72dd189f7481'
+
 
     req = await getRequest(`https://www.haloapi.com/stats/hw2/player-leaderboards/csr/${seasonId}/${playlistId}?count=${count}`)
     json = await getJson(req)

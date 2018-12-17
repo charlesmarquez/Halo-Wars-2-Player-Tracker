@@ -4,6 +4,9 @@ const en = require('javascript-time-ago/locale/en');
 const halo = require('./hw2api');
 const db = require('../connection/db');
 const config = require('../config');
+var moment = require('moment');
+var fs = require('fs');
+var path = require('path');
 
 var mapsPromise = halo.parseMaps()
 
@@ -79,7 +82,7 @@ function getPlaylist(result) {
 }
 
 function time_ago(result) {
-    timeStart = new Date(result.MatchStartDate.ISO8601Date) //
+    timeStart = new Date(result.MatchStartDate.ISO8601Date).getTime() //
     timenow = Date.now()
     duration = result.PlayerMatchDuration
     duration = formatDuration(duration)
@@ -87,12 +90,21 @@ function time_ago(result) {
     TimeAgo.addLocale(en)
     timeAgo = new TimeAgo('en-US')
     diffms = timenow - timeStart - duration
+    lastonline = Date.now() - diffms
+    diff = moment(lastonline).fromNow()
+    // diff = timeAgo.format(Date.now() - diffms, 'canonical')
+
+    // console.log(`timenow: ${timenow}`);
+    // console.log(`timestart: ${timeStart}`);
+    // console.log(`duration: ${duration}`);
+    // console.log(`diffms: ${diffms}`);
+    // console.log(`lastonline: ${lastonline}`);
+    // console.log(`diff: ${diff}`);
 
     durMin = Math.floor(duration / 1000 / 60)
     durSec = Math.floor((duration - durMin * 1000 * 60) / 1000)
 
 
-    diff = timeAgo.format(Date.now() - diffms, 'canonical')
     return {
         seconds: Math.floor(diffms / 1000),
         ms: diffms,
@@ -148,20 +160,23 @@ module.exports.matchEvents = matchEvents
  * @returns {void}
  */
 
-async function dumpLeaderboardAll(playlist) {
+async function dumpLeaderboardAll() {
 
-    console.log(`Dump started for ${playlist}`);
+    console.log(`Dump started (ALL).`);
+    const players = JSON.parse(fs.readFileSync(path.join(__dirname, 'players.json')))
+    const results = []
 
-    halo.getLeaderboard(playlist, 250).then(async (results) => {
-        for (const player of results) {
-            delete player.Score
-            delete player.Rank
-            player.history = await getHistoryData(player.Player.Gamertag) // 1 api call: Returns Match History response + custom attrs
-            player.season = await halo.getSeasonStats(player.Player.Gamertag) // 1 api call: returns Season stats endpoint
-            player.mmr = await halo.getPlaylistStats(player.Player.Gamertag) // 3 api calls: returns MMR for 1,2,3 ranked playlists
-            player.updated = Date.now()
-            player._id = player.Player.Gamertag
+        for (const player of players) {
+            results.push ({
+                player : player,
+                history : await getHistoryData(player), // 1 api call: Returns Match History response + custom attrs
+                season: await halo.getSeasonStats(player),
+                mmr: await halo.getPlaylistStats(player),
+                updated : Date.now(),
+                _id : player
+            })
         }
+
         db.updateValues({
             item: results,
             dbname: 'halo',
@@ -169,26 +184,25 @@ async function dumpLeaderboardAll(playlist) {
         }, res => {
             console.log(`Data successfully dumped`)
         })
-    }).catch(err => {
-        console.error(err)
-    })
 }
 
 module.exports.dumpLeaderboardAll = dumpLeaderboardAll
 
-
-async function dumpLeaderboardHistory(playlist) {
+async function dumpLeaderboardHistory() {
     
-    console.log(`Dump started for ${playlist}`);
+    console.log(`Dump started. (HISTORY)`);
+    const players = JSON.parse(fs.readFileSync(path.join(__dirname, 'players.json')))
+    const results = []
 
-    halo.getLeaderboard(playlist, 250).then(async (results) => {
-        for (const player of results) {
-            delete player.Score
-            delete player.Rank
-            player.history = await getHistoryData(player.Player.Gamertag) // 1 api call: Returns Match History response + custom attrs
-            player.updated = Date.now()
-            player._id = player.Player.Gamertag
+        for (const player of players) {
+            results.push ({
+                player : player,
+                history : await getHistoryData(player), // 1 api call: Returns Match History response + custom attrs
+                updated : Date.now(),
+                _id : player
+            })
         }
+
         db.updateValues({
             item: results,
             dbname: 'halo',
@@ -196,12 +210,28 @@ async function dumpLeaderboardHistory(playlist) {
         }, res => {
             console.log(`Data successfully dumped`)
         })
-    }).catch(err => {
-        console.error(err)
-    })
 }
 module.exports.dumpLeaderboardHistory = dumpLeaderboardHistory
 
-// dumpLeaderboardHistory('548d864e-8666-430e-9140-8dd2ad8fbfcd')
-// dumpLeaderboardHistory('379f9ee5-92ec-45d9-b5e5-9f30236cab00')
-// dumpLeaderboardHistory('4a2cedcc-9098-4728-886f-60649896278d')
+async function updatePlayers() {
+    var arr = []
+    set = new Set()
+
+    for (const playlist of config.playlists) {
+        var res = await halo.getLeaderboard({
+            playlistId: playlist.id
+        })
+        for (let i = 0; i < res.length; i++) {
+            const player = res[i];
+            set.add(player.Player.Gamertag)
+        }
+    }
+
+    arr = Array.from(set)
+
+    var data = fs.readFileSync(path.join(__dirname, 'players.json'));
+    var json = JSON.parse(data);
+    json.push(...arr);
+    fs.writeFileSync("players.json", JSON.stringify(arr))
+}
+module.exports.updatePlayers = updatePlayers

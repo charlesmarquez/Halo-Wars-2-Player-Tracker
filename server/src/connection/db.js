@@ -102,3 +102,29 @@ async function getCollection({
     }
 }
 module.exports.getCollection = getCollection
+
+async function getValues1({
+    dbname = config.dbname,
+    collection = config.collection
+} = {}) {
+    conn = await getconn()
+    db = conn.db(dbname)
+
+    var coll = await db.collection(collection)
+    var cursor = await coll.find();
+
+
+    console.log(await cursor.next());
+    console.log(await cursor.next());
+    console.log(await cursor.next());
+
+    var x = 0
+    // console.time('cursor.toArray')
+    cursor.map(elem => {
+        return elem
+    })
+    console.log(x);
+    // console.timeEnd('cursor.toArray')
+    conn.close()
+    // return results
+}

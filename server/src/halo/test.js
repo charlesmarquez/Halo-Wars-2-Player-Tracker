@@ -4,6 +4,7 @@ const mongo = require('../connection/db');
 const {
     KeyQueue
 } = require('./KeyQueue');
+var fs = require('fs');
 
 keys = new KeyQueue()
 keys.addKeys(config.keys)
@@ -68,7 +69,10 @@ async function getLeaderboard({
     playlistId = `548d864e-8666-430e-9140-8dd2ad8fbfcd`,
     count = 250,
 } = {}) {
-    seasonId = '3527a6d6-29d6-485f-9be6-83a5881ce42c'
+    // seasonId = '3527a6d6-29d6-485f-9be6-83a5881ce42c'
+    // seasonId = '3cda4240-6d72-4b09-99cd-f1f2c89eb0ee'
+    seasonId = '768ff143-675d-49e2-9955-72dd189f7481'
+
 
     req = await getRequest(`https://www.haloapi.com/stats/hw2/player-leaderboards/csr/${seasonId}/${playlistId}?count=${count}`)
     json = await getJson(req)
@@ -76,21 +80,6 @@ async function getLeaderboard({
     results = json.Results
     return results
 }
-
-// mongo.getCollection({
-//    dbname: 'test',
-//    collection: 'playercsr' 
-// })
-// .then(res => {
-//     x = res.coll.find({}, {"Player": 1})
-//     console.log(x);
-// })
-
-// x = mongo.updateValues({
-//     item: [{TEST: 'VALUE'}, {TEST: 'VALUE2'}],
-//     dbname: 'test',
-//     collection: 'playercsr1'
-// })
 
 async function updateFromLeaderboard() {
     set = new Set()
@@ -109,7 +98,7 @@ async function updateFromLeaderboard() {
     console.log(set.size);
     iter = set.values();
     arr = []
-    
+
     for (var i = 0; i < set.size; i++) {
         player = iter.next().value
         arr.push({
@@ -149,4 +138,28 @@ async function addToPlayerList(player) {
     console.timeEnd('toArray')
 }
 
-updateFromLeaderboard()
+async function updatePlayers() {
+    var arr = []
+    set = new Set()
+
+    for (const playlist of config.playlists) {
+        var res = await getLeaderboard({
+            playlistId: playlist.id
+        })
+        console.log(res.len);
+    }
+    for (let i = 0; i < res.length; i++) {
+        const player = res[i];
+        set.add(player.Player.Gamertag)
+    }
+    arr = Array.from(set)
+
+    console.log(arr.len);
+
+    // var data = fs.readFileSync('testOutput.json');
+    // var json = JSON.parse(data);
+    // json.push(...arr);
+    // fs.writeFileSync("players.json", JSON.stringify(arr))
+}
+
+updatePlayers()
