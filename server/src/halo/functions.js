@@ -55,7 +55,6 @@ async function getHistoryData(playerName = 'Mike BEASTon') {
     }
 
     // console.log(history);
-
     return history
 }
 

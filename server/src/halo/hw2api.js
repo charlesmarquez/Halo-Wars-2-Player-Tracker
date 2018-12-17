@@ -70,9 +70,9 @@ async function getJson(response) {
     return json;
 }
 
-async function getHistory(count = 2, player = 'aykonz sidekick') {
+async function getHistory(count = 1, player = 'aykonz sidekick') {
 
-    var url = `https://www.haloapi.com/stats/hw2/players/${player}/matches?start=1&count=${count}`
+    var url = `https://www.haloapi.com/stats/hw2/players/${player}/matches?start=0&count=${count}`
     const response = await getRequest(url);
     const json = await getJson(response);
 
@@ -99,7 +99,6 @@ async function getHistory(count = 2, player = 'aykonz sidekick') {
     }, err => {
         console.error(err)
     })
-
     return events[0]
 }
 module.exports.getHistory = getHistory
